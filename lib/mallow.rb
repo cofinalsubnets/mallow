@@ -1,11 +1,11 @@
 require 'psych'
-require_relative 'rule'
-require_relative 'fluffer'
+require 'mallow/rule'
+require 'mallow/fluffer'
 module Mallow
 
   @config = {
     parser: Psych,
-    parser_msg: :load,
+    verb: :load,
     strip_singlets?: true,
     splat_arrays?: true
   }
