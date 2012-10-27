@@ -5,9 +5,7 @@ module Mallow
 
   @config = {
     parser: Psych,
-    verb: :load,
-    strip_singlets?: true,
-    splat_arrays?: true
+    verb: :load
   }
 
   def self.config
@@ -18,8 +16,8 @@ module Mallow
     @config.has_key?(s.to_sym) ? @config[s.to_sym] : super
   end
 
-  def self.fluff(&blk)
-    Fluffer.build &blk
+  def self.fluff(config = {}, &blk)
+    Fluffer.build config, &blk
   end
 
 end

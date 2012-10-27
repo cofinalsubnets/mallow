@@ -41,7 +41,7 @@ module Mallow
       end
       alias * anything
 
-      def and_instantiate(obj, splat = Mallow.splat_arrays?)
+      def and_instantiate(obj, splat = true)
         and_send :new, obj, splat
       end
 
@@ -54,7 +54,7 @@ module Mallow
         to { |elt| Hash[ elt.zip vals ] }
       end
 
-      def and_send(msg, obj, splat = Mallow.splat_arrays?)
+      def and_send(msg, obj, splat = true)
         to { |elt|
           if splat and elt.is_a? Array
             obj.send msg, *elt
