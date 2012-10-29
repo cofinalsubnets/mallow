@@ -5,6 +5,7 @@ require 'mallow/version'
 mallow = Gem::Specification.new do |spec|
   spec.name = 'mallow'
   spec.version = Mallow::VERSION
+  spec.add_development_dependency 'rspec'
   spec.author = 'feivel jellyfish'
   spec.email = 'feivel@sdf.org'
   spec.files = FileList['lib/**/*.rb']
