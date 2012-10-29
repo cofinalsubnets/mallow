@@ -42,10 +42,14 @@ Mallow lets you specify your own conditions and actions and has a rich vocabular
 
 ## Configuration ##
 
-Mallow has several configuration options accessible through Mallow::config. Options include:
+Mallow's config hash contains the following options:
 
 - :parser: the parser to use when fed strings through Mallow::Fluffer#parse. Default is Psych.
 - :verb: the message to send to the parser to induce it to transform a serialized string into Ruby data structures. For Psych, e.g., this is :load; for CSV, it is :parse.
-- :strip_singlets?: in the even that a rule contains only one action (which will be the case in most straightforward use cases), return the actions's return value as a bare object, rather than a singleton array. Default is true.
-- :splat_arrays?: when specifying actions with convenience methods like #and_instantiate, the a matching element is an array, pass its elements as individual arguments to the method called by the action? Default is true.
 
+Per Fluffer parsers can be specified as well:
+
+```ruby
+  Mallow.fluff(parser: CSV, verb: :parse) do |match|
+    ...
+  end
