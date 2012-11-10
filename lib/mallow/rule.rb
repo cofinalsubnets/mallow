@@ -1,9 +1,7 @@
-require 'mallow/rule/result'
-require 'mallow/rule/builder'
-
 module Mallow
   class Rule
     attr_accessor :conditions, :actions
+    Result = Class.new Struct.new :success, :value
 
     def initialize(conditions = [], actions = [])
       @conditions, @actions = conditions, actions
@@ -19,3 +17,5 @@ module Mallow
 
   end
 end
+
+require_relative 'rule/builder'

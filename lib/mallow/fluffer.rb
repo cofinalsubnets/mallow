@@ -1,19 +1,6 @@
 module Mallow
-  class Fluffer
-    attr_accessor :config, :rules
+  class Fluffer < Struct.new(:rules)
     DeserializationException = Class.new StandardError
-
-    def initialize(rules, config = Mallow.config)
-      @rules, @config = rules, config
-    end
-
-    def parse(str)
-      fluff config[:parser].send(config[:verb], str)
-    end
-
-    def parse_one(str)
-      fluff_one config[:parser].send(config[:verb], str)
-    end
 
     def fluff(elts)
       elts.map {|elt| fluff_one elt}
@@ -27,9 +14,8 @@ module Mallow
       raise DeserializationException.new "No rule matches #{elt}"
     end
 
-    def self.build(config = {}, &blk)
-      config = Mallow.config.merge config
-      new (Rule::Builder.build &blk), config
+    def self.build(&blk)
+      new Rule::Builder.build(&blk)
     end
 
   end

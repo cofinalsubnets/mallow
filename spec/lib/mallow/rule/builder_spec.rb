@@ -11,24 +11,6 @@ describe Mallow::Rule::Builder do
     @builder.rules.size.should == 1
   end
 
-  describe '#new_rule' do
-    it 'appends a new rule' do
-      @builder.new_rule.rules.size.should == 2
-    end
-    it 'sets the context to :conditions' do
-      @builder.context = :actions
-      @builder.new_rule.context.should == :conditions
-    end
-    context 'when called with a proc argument' do
-      it 'appends a condition to the new rule' do
-        @builder.new_rule @proc
-        conditions = @builder.rules.last.conditions
-        conditions.size.should == 1
-        conditions.first.should == @proc
-      end
-    end
-  end
-
   describe '#and' do
     [:actions, :conditions].each do |param|
       context "when @context == :#{param}" do
@@ -36,7 +18,7 @@ describe Mallow::Rule::Builder do
 
         it "appends a new #{param.to_s.chop} to the current rule" do
           @builder.and &@proc
-          @builder.rules.last.send(@builder.context).last.should == @proc
+          @builder.rules.last.send(param).last.should == @proc
         end
       end
     end
@@ -157,5 +139,5 @@ describe Mallow::Rule::Builder do
       Mallow::Rule::Builder.build {}
     end
   end
-
 end
+
