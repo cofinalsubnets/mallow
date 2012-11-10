@@ -34,9 +34,6 @@ class Mallow::Rule::Builder
     an(Array).size(n)
   end
 
-  alias an a
-  alias * anything
-
   # ACTIONS
 
   def to(&blk)
@@ -64,8 +61,6 @@ class Mallow::Rule::Builder
     append blk
   end
 
-  alias and_hashify_with and_hashify_with_keys
-
   private
 
   def append(_proc)
@@ -80,5 +75,8 @@ class Mallow::Rule::Builder
     @context = new_context
   end
 
+  alias an a
+  alias * anything
+  alias and_hashify_with and_hashify_with_keys
 end
 
