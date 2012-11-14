@@ -2,9 +2,9 @@ require 'spec_helper'
 
 describe Mallow::Rule do
   before { @rule   = Mallow::Rule.new }
-  describe '#execute' do
+  describe '#call' do
     it 'returns an instance of Mallow::Rule::Result' do
-      @rule.execute(nil).should be_an_instance_of Mallow::Rule::Result
+      @rule[nil].should be_an_instance_of Mallow::Rule::Result
     end
 
     [['succeeding', true], ['failing', false]].each do |cond, success|
@@ -12,7 +12,7 @@ describe Mallow::Rule do
         before { @rule.conditions << proc { success } }
         it "returns a #{cond} result" do
           [true, false, nil, [1], 2345, {6 => 7}].each do |elt|
-            @rule.execute(elt).success.should == success
+            @rule[elt].success.should == success
           end
         end
       end
@@ -27,7 +27,7 @@ describe Mallow::Rule do
         ].each {|c| @rule.conditions << c}
       end
       it 'calls the conditions in order' do
-        @rule.execute(8)
+        @rule[8]
         @called.should == [1, 2, 3]
       end
       it 'succeeds if and only if all conditions return truish' do

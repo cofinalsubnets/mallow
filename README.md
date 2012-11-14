@@ -6,7 +6,6 @@ Mallow is a tiny data deserializer with convenient parser integration and a frie
 
 First marshal, then Mallow!
 
-
 ```ruby
   data = [{:hay => :good_buddy}]
 
@@ -16,7 +15,6 @@ First marshal, then Mallow!
 
   fluffer.fluff data #=> ['hay good_buddy']
 ```
-
 Mallow can also wrap a parser:
 
 ```ruby

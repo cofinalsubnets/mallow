@@ -7,7 +7,7 @@ class Mallow::Fluffer < Struct.new(:rules)
 
   def fluff_one(elt)
     rules.each do |rule|
-      res = rule.execute elt
+      res = rule[elt]
       return res.value if res.success
     end
     raise DeserializationException.new "No rule matches #{elt}"
@@ -18,3 +18,4 @@ class Mallow::Fluffer < Struct.new(:rules)
   end
 
 end
+

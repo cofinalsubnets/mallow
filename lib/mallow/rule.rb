@@ -1,19 +1,19 @@
 module Mallow
-  class Rule
-    attr_accessor :conditions, :actions
+  class Rule < Struct.new(:conditions, :actions)
     Result = Class.new Struct.new :success, :value
 
-    def initialize(conditions = [], actions = [])
-      @conditions, @actions = conditions, actions
+    def initialize
+      self.conditions, self.actions = [], []
     end
 
-    def execute(elt)
-      if conditions.all? {|cond| cond.call elt}
-        Result.new true, actions.inject(elt) {|e, act| act.call e} 
+    def call(elt)
+      if conditions.all? {|cond| cond[elt]}
+        Result.new true, actions.inject(elt) {|e, act| act[e]}
       else
         Result.new false, elt
       end
     end
+    alias [] call
 
   end
 end

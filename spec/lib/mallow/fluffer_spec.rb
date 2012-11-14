@@ -15,7 +15,7 @@ describe Mallow::Fluffer do
   describe '#fluff_one' do
     context 'with rules' do
       before do
-        @fluffer = Mallow.fluff do |match|
+        @fluffer = Mallow::Fluffer.build do |match|
           match.an(Array).to {1}
           match.a(Hash).to {2}
         end
