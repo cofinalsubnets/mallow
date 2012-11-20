@@ -1,6 +1,6 @@
 module Mallow
   VERSION = '0.1.5'
-  DeserializationException = Class.new StandardError
+  class DeserializationException < StandardError; end
 
   class Core < Struct.new :rules
 
@@ -19,10 +19,10 @@ module Mallow
     def self.build(&blk)
       new RuleBuilder.build &blk
     end
-  end
+  end # Core
 
   class Rule < Struct.new :conditions, :actions
-    Result = Class.new Struct.new(:success, :value)
+    class Result < Struct.new :success, :value; end
 
     def initialize
       self.conditions, self.actions = [], []
@@ -36,7 +36,7 @@ module Mallow
       end
     end
     alias [] call
-  end
+  end # Rule
 
   class RuleBuilder
     attr_reader :rules, :context
@@ -114,7 +114,7 @@ module Mallow
     alias an a
     alias * anything
     alias and_hashify_with and_hashify_with_keys
-  end
+  end # RuleBuilder
 
 end
 
