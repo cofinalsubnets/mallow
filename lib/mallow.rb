@@ -3,118 +3,75 @@ module Mallow
   class DeserializationException < StandardError; end
 
   class Core < Struct.new :rules
-
-    def fluff(es)
-      es.map {|e| fluff1 e}
-    end
+    def self.build(&b); new(DSL.build &b)     end
+    def fluff(es);      es.map {|e| fluff1 e} end
 
     def fluff1(e)
-      rules.each do |rule|
-        res = rule[e]
-        return res.value if res.success
-      end
+      rules.each {|r| res=r[e]; return res[1] if res[0]}
       raise DeserializationException.new "No rule matches #{e}"
-    end
-
-    def self.build(&blk)
-      new RuleBuilder.build &blk
     end
   end # Core
 
   class Rule < Struct.new :conditions, :actions
-    class Result < Struct.new :success, :value; end
-
     def initialize
       self.conditions, self.actions = [], []
     end
 
     def call(elt)
-      if conditions.all? {|cond| cond[elt]}
-        Result.new true, actions.inject(elt) {|e, act| act[e]}
-      else
-        Result.new false, elt
-      end
+      [(r=conditions.all?{|c| c[elt]}), r ? actions.inject(elt){|e,a| a[e]} : elt]
     end
     alias [] call
   end # Rule
 
-  class RuleBuilder
+  class DSL
     attr_reader :rules, :context
-
     def self.build
-      builder = new
-      yield builder
-      builder.rules
+      yield (dsl = new)
+      dsl.rules
     end
 
     def initialize
-      @rules, @context = [Mallow::Rule.new], :conditions
+      @rules, @context = [Rule.new], :conditions
     end
 
-    def where(&blk)
-      self.context = :conditions
-      append blk
+    def where(&b)
+      _set_c :conditions
+      _append b
     end
 
-    def size(n)
-      where {|e| e.size == n rescue false}
-    end
-
-    def a(thing)
-      where {|e| e.is_a? thing}
-    end
-
-    def anything
-      where {true}
-    end
-
-    def tuple(n)
-      an(Array).size(n)
-    end
-
-    def to(&blk)
-      self.context = :actions
-      append blk
-    end
-
-    def and_hashify_with_keys(*keys)
-      to {|e| Hash[keys.zip e]}
-    end
-
-    def and_hashify_with_values(*vals)
-      to {|e| Hash[e.zip vals]}
+    def to(&b)
+      _set_c :actions
+      _append b
     end
 
     def and_send(msg, obj, splat = false)
       to {|e| splat ? obj.send(msg, *e) : obj.send(msg, e)}
     end
 
-    def and_instantiate(obj, splat = false)
-      and_send :new, obj, splat
-    end
+    def a(c);     where {|e| e.is_a? c}                   end
+    def *;        where {true}                            end
+    def tuple(n); a(Array).size(n)                        end
+    def and(&b);  _append(b)                              end
+    def size(n);  where {|e| e.size==n rescue false}      end
+    def to_new(o,s=false); and_send(:new,o,s)             end
+    def to_hash_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
+    def to_hash_with_values(*vs); to {|e| Hash[e.zip vs]} end
 
-    def and(&blk)
-      append blk
-    end
+    alias an a
+    alias anything *
+    alias to_hash_with to_hash_with_keys
 
     private
-
-    def append(_proc)
+    def _append(_proc)
       @rules.last.send(@context).push _proc
       self
     end
 
-    def context=(new_context)
-      if @context == :actions and new_context == :conditions
-        @rules << Mallow::Rule.new
-      end
-      @context = new_context
+    def _set_c(nc)
+      @rules << Rule.new if @context == :actions && nc == :conditions
+      @context = nc
     end
-
-    alias an a
-    alias * anything
-    alias and_hashify_with and_hashify_with_keys
-  end # RuleBuilder
-
+  end # DSL
+  def self.+@(&b); Core.build(&b) end
 end
 

@@ -3,8 +3,8 @@ require 'spec_helper'
 describe Mallow::Rule do
   before { @rule   = Mallow::Rule.new }
   describe '#call' do
-    it 'returns an instance of Mallow::Rule::Result' do
-      @rule[nil].should be_an_instance_of Mallow::Rule::Result
+    it 'returns an array' do
+      @rule[nil].should be_an_instance_of Array
     end
 
     [['succeeding', true], ['failing', false]].each do |cond, success|
@@ -12,7 +12,7 @@ describe Mallow::Rule do
         before { @rule.conditions << proc { success } }
         it "returns a #{cond} result" do
           [true, false, nil, [1], 2345, {6 => 7}].each do |elt|
-            @rule[elt].success.should == success
+            @rule[elt].first.should == success
           end
         end
       end

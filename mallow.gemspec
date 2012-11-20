@@ -1,6 +1,6 @@
 $LOAD_PATH.push File.expand_path("../lib", __FILE__)
 require 'rake'
-require 'mallow/version'
+require 'mallow'
 
 mallow = Gem::Specification.new do |spec|
   spec.name = 'mallow'
