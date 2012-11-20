@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-describe Mallow::Rule::Builder do
+describe Mallow::RuleBuilder do
 
   before do
-    @builder = Mallow::Rule::Builder.new
+    @builder = Mallow::RuleBuilder.new
     @proc = proc { true }
   end
 
@@ -128,15 +128,15 @@ describe Mallow::Rule::Builder do
 
   describe '#and_instantiate' do
     it "calls ::new on the supplied class with the matched array's elements" do
-      verify_values @builder.*.and_instantiate(Array).rules.last,
+      verify_values @builder.*.and_instantiate(Array, true).rules.last,
         [1,2] => [2]
     end
   end
 
   describe '::build' do
     it 'instantiates a new Builder' do
-      Mallow::Rule::Builder.should_receive(:new).and_return @builder
-      Mallow::Rule::Builder.build {}
+      Mallow::RuleBuilder.should_receive(:new).and_return @builder
+      Mallow::RuleBuilder.build {}
     end
   end
 end
