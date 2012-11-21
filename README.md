@@ -1,21 +1,22 @@
 # Mallow #
 
-Mallow is a tiny data deserializer with convenient parser integration and a friendly interface for specifying inflation rules.
+Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing as few wheels as possible.
 
-## Usage ##
+## Papa teach me to Mallow ##
 
-First marshal, then Mallow!
+Is very easy little boy: first marshal, then Mallow!
 
 ```ruby
-  data = [{:hay => :good_buddy}]
-
-  m = Mallow.fluff do |match|
+  mallow = Mallow::Core.build do |match|
     match.a( Hash ).to {|h| "#{h.keys.first} #{h.values.first}"}
   end
-
-  m.fluff data #=> ['hay good_buddy']
 ```
-Mallow implements a DSL for specifying conditions and actions, with a rich vocabulary of built-in helpers:
+Now feed your mallow some iterable data:
+```ruby
+  data = [{:hay => :good_buddy}]
+  mallow.fluff data #=> ['hay good_buddy']
+```
+Mallow's DSL has a moderately rich vocabulary of built-in helpers:
 ```ruby
   Mallow.fluff { |match|
     match.a( Float ).to &:to_i
@@ -24,5 +25,29 @@ Mallow implements a DSL for specifying conditions and actions, with a rich vocab
     match.a( Hash ).of_size( 22 ).with_key( :crab_nebula ).to { EPIC_SPACE_JOURNEY }
     match.*.to { WILDCARD }
   }.fluff( data )
+```
+
+## Metadata ##
+
+A Mallow::Core is stateless, so it can't supply stateful metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
+```ruby
+  Mallow.fluff do |m|
+    line = 0
+    m.a(Fixnum).to {"Found a fixnum on line #{line+=1}"}
+    m.*.to {|e| line+=1;e}
+  end
+```
+But that is just awful, and will betray you if you forget to increment the line number or define your rules in different lexical environments. Luckily the second reason is that this isn't what Mallow is for, and it should be done as part of some kind of post-processing anyway.
+
+To aid in post-processing, Mallow provides an easy way to wrap results in metadata hashes:
+```ruby
+  Mallow.core do |m|
+    m.a(Fixnum).md type: Fixnum
+    m.*.md
+  end
+```
+Then you can unwrap a metadata object like:
+```ruby
+  -metadata #=> alias for metadata.object
 ```
 

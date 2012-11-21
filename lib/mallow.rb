@@ -1,5 +1,5 @@
 module Mallow
-  VERSION = '0.1.5'
+  VERSION = '0.0.2'
   class DeserializationException < StandardError; end
 
   class << self
@@ -7,8 +7,8 @@ module Mallow
   end
 
   class Core < Struct.new :rules
-    def self.build(&b); new(DSL.build &b)     end
-    def fluff(es);      es.map {|e| fluff1 e} end
+    def self.build(&b); new(DSL.build &b) end
+    def fluff(es); es.map {|e| fluff1 e}  end
     def fluff1(e)
       rules.each {|r| res=r[e]; return res[1] if res[0]}
       raise DeserializationException.new "No rule matches #{e}"
@@ -24,6 +24,15 @@ module Mallow
     end
     alias [] call
   end # Rule
+
+  class Meta < Hash
+    attr_reader :object
+    def initialize(o,h={})
+      @object = o
+      merge! h
+    end
+    alias -@ object
+  end # Meta
 
   class DSL
     attr_reader :rules, :context
@@ -50,6 +59,10 @@ module Mallow
       to {|e| splat ? obj.send(msg, *e) : obj.send(msg, e)}
     end
 
+    def with_metadata(d={})
+      to {|e| Meta.new e, d}
+    end
+
     def a(c);     where {|e| e.is_a? c} end
     def *;        where {true}          end
     def tuple(n); a(Array).size(n)      end
@@ -61,6 +74,7 @@ module Mallow
     def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
 
     alias an a
+    alias md with_metadata
     alias anything *
     alias and_hashify_with and_hashify_with_keys
     alias and_make_a and_make
