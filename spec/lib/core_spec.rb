@@ -2,30 +2,30 @@ require 'spec_helper'
 
 describe Mallow::Core do
 
-  before { @core = Mallow::Core.build {}}
+  before { @fluffer = Mallow::Core.new [] }
 
   describe '#fluff' do
     it 'maps #fluff1 over its arguments' do
       data = %w{ me i like a good american made hot dog time to time }
-      data.each {|word| @core.should_receive(:fluff1).with word }
-      @core.fluff(data).should == data.map {nil}
+      data.each {|word| @fluffer.should_receive(:fluff1).with word }
+      @fluffer.fluff(data).should == data.map {nil}
     end
   end
 
   describe '#fluff1' do
     context 'with rules' do
       before do
-        @core = Mallow::Core.build do |match|
+        @fluffer = Mallow::Core.build do |match|
           match.an(Array).to {1}
           match.a(Hash).to {2}
         end
       end
       it "executes the fluffer's rules on its argument until one matches" do
-        @core.fluff1([1]).should == 1
-        @core.fluff1({a:1}).should == 2
+        @fluffer.fluff1([1]).should == 1
+        @fluffer.fluff1({a:1}).should == 2
       end
       it "raises an exception if no rule matches" do
-        expect { @core.fluff1(1) }.to raise_error Mallow::DeserializationException
+        expect { @fluffer.fluff1(1) }.to raise_error Mallow::DeserializationException
       end
     end
   end
