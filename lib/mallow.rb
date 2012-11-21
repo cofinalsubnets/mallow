@@ -1,14 +1,12 @@
 module Mallow
-  VERSION = '0.1.5'
+  VERSION = '0.0.2'
   class DeserializationException < StandardError; end
 
-  class << self
-    def fluff(&b); Core.new(&b) end
-  end
+  def self.fluff(&b); Core.build(&b) end
 
-  class Core < Struct.new :rules
-    def self.build(&b); new(DSL.build &b)     end
-    def fluff(es);      es.map {|e| fluff1 e} end
+  class Core < Struct.new :rules, :md
+    def self.build(&b); new(*DSL.build(&b)) end
+    def fluff(es) -md; es.map {|e| +md; fluff1 e} end
     def fluff1(e)
       rules.each {|r| res=r[e]; return res[1] if res[0]}
       raise DeserializationException.new "No rule matches #{e}"
@@ -19,21 +17,28 @@ module Mallow
     def initialize
       self.conditions, self.actions = [], []
     end
-    def call(elt)
-      [(r=conditions.all?{|c| c[elt]}), r ? actions.inject(elt){|e,a| a[e]} : elt]
+    def call(e)
+      [(r=conditions.all?{|c| c[e]}), r ? actions.inject(e){|e,a| a[e]} : e]
     end
     alias [] call
   end # Rule
 
+  class Metadata < Hash
+    def -@; self[:_rec]=0  end
+    def +@; self[:_rec]+=1 end
+    def ln; self[:_rec]    end
+    alias line ln
+  end # Metadata
+
   class DSL
-    attr_reader :rules, :context
+    attr_reader :rules, :context, :md
     def self.build
-      yield (dsl = new)
-      dsl.rules
+      yield (dsl = new), dsl.md
+      [dsl.rules, dsl.md]
     end
 
     def initialize
-      @rules, @context = [Rule.new], :conditions
+      @rules, @context, @md = [Rule.new], :conditions, Metadata.new
     end
 
     def where(&b)
@@ -67,6 +72,7 @@ module Mallow
     alias and_make_an and_make
     alias a_tuple tuple
     alias of_size size
+    alias metadata md
 
     private
     def _append(p)
