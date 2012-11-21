@@ -112,23 +112,23 @@ describe Mallow::DSL do
     end
   end
 
-  describe '#to_hash_with_keys' do
+  describe '#and_hashify_with_keys' do
     it "builds a hash with keys passed as arguments and values from the matched array" do
-      verify_values @dsl.to_hash_with_keys(:name, :age).rules.last,
+      verify_values @dsl.and_hashify_with_keys(:name, :age).rules.last,
         ['Pete', 21] => {name: 'Pete', age: 21}
     end
   end
 
-  describe '#to_hash_with_values' do
+  describe '#and_hashify_with_values' do
     it "builds a hash with values passed as arguments and keys from the matched array" do
-      verify_values @dsl.to_hash_with_values(:name, :age).rules.last,
+      verify_values @dsl.and_hashify_with_values(:name, :age).rules.last,
         ['Pete', 21] => {'Pete' => :name, 21 => :age}
     end
   end
 
-  describe '#to_new' do
+  describe '#and_make' do
     it "calls ::new on the supplied class with the matched array's elements" do
-      verify_values @dsl.*.to_new(Array, true).rules.last,
+      verify_values @dsl.*.and_make(Array, true).rules.last,
         [1,2] => [2]
     end
   end

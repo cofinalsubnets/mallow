@@ -2,10 +2,13 @@ module Mallow
   VERSION = '0.1.5'
   class DeserializationException < StandardError; end
 
+  class << self
+    def fluff(&b); Core.new(&b) end
+  end
+
   class Core < Struct.new :rules
     def self.build(&b); new(DSL.build &b)     end
     def fluff(es);      es.map {|e| fluff1 e} end
-
     def fluff1(e)
       rules.each {|r| res=r[e]; return res[1] if res[0]}
       raise DeserializationException.new "No rule matches #{e}"
@@ -16,7 +19,6 @@ module Mallow
     def initialize
       self.conditions, self.actions = [], []
     end
-
     def call(elt)
       [(r=conditions.all?{|c| c[elt]}), r ? actions.inject(elt){|e,a| a[e]} : elt]
     end
@@ -48,22 +50,27 @@ module Mallow
       to {|e| splat ? obj.send(msg, *e) : obj.send(msg, e)}
     end
 
-    def a(c);     where {|e| e.is_a? c}                   end
-    def *;        where {true}                            end
-    def tuple(n); a(Array).size(n)                        end
-    def and(&b);  _append(b)                              end
-    def size(n);  where {|e| e.size==n rescue false}      end
-    def to_new(o,s=false); and_send(:new,o,s)             end
-    def to_hash_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
-    def to_hash_with_values(*vs); to {|e| Hash[e.zip vs]} end
+    def a(c);     where {|e| e.is_a? c} end
+    def *;        where {true}          end
+    def tuple(n); a(Array).size(n)      end
+    def and(&b);  _append(b)            end
+    def size(n);     where {|e| e.size==n     rescue false}   end
+    def with_key(k); where {|e| e.has_key?(k) rescue false}   end
+    def and_make(o,s=false);          and_send(:new,o,s)      end
+    def and_hashify_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
+    def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
 
     alias an a
     alias anything *
-    alias to_hash_with to_hash_with_keys
+    alias and_hashify_with and_hashify_with_keys
+    alias and_make_a and_make
+    alias and_make_an and_make
+    alias a_tuple tuple
+    alias of_size size
 
     private
-    def _append(_proc)
-      @rules.last.send(@context).push _proc
+    def _append(p)
+      @rules.last.send(@context) << p
       self
     end
 
@@ -72,6 +79,5 @@ module Mallow
       @context = nc
     end
   end # DSL
-  def self.+@(&b); Core.build(&b) end
 end
 
