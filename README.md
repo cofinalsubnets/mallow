@@ -1,6 +1,6 @@
 # Mallow #
 
-Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing relatively few wheels.
+Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing <s>as few wheels as possible</s> <s>relatively few wheels</s> fewer than one wheel per 20 LOC.
 
 ## Papa teach me to mallow ##
 
@@ -39,15 +39,15 @@ A mallow is stateless, so it can't supply stateful metadata (like index or match
 ```
 But that is just awful, and will betray you if you forget to increment the line number or define your rules in different lexical environments. Luckily the second reason is that this isn't what Mallow is for, and it should be done as part of some kind of post-processing anyway.
 
-To aid in post-processing, Mallow provides an easy way to wrap results in metadata hashes:
+However! Mallow _does_ wrap matched elements in metadata, which can be accessed transparently at any point during the course of a match:
 ```ruby
-  Mallow.core do |m|
-    m.a(Fixnum).md type: Fixnum
-    m.*.md
+  doubler = Mallow.fluff do |m|
+    m.a(Fixnum).with_metadata(type: Fixnum).to {|n| n*2}
+    m.anything.to {nil}.^(matched: false) # aliased to with_metadata
   end
-```
-Then you can unwrap a metadata object like:
-```ruby
-  -metadata #=> alias for metadata.object
+
+  data = doubler.fluff  [1,2,:moo]     #=> [2, 4, nil]
+  metadata = doubler._fluff [1,2,:moo] #=> [#<Mallow::Meta>, ...]
+  metadata.map(&:obj) == data          #=> true!
 ```
 
