@@ -1,6 +1,6 @@
 # Mallow #
 
-Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing as few wheels as possible.
+Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing relatively few wheels.
 
 ## Papa teach me to mallow ##
 

@@ -4,15 +4,10 @@ module Mallow
 
   class << self
     def fluff(&b); Core.build(&b) end
-
-    def engulf(klass, &b)
-      klass.extend Module.new {
-        attr_accessor :mallow
-        def fluff(data)
-          mallow.fluff data
-        end
-      }
-      klass.mallow = Mallow::Core.build &b
+    def engulf(klass, sym=:fluff, &b)
+      mtd, mod = Mallow.fluff(&b), Module.new
+      mod.send(:define_method, sym) {|d| mtd.fluff d}
+      klass.extend mod
     end
   end
 
