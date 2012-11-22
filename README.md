@@ -1,6 +1,6 @@
 # Mallow #
 
-Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing <s>as few wheels as possible</s> <s>relatively few wheels</s> fewer than one wheel per 20 LOC.
+Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ fewer than one wheel per 20 LOC.
 
 ## Papa teach me to mallow ##
 
@@ -29,7 +29,7 @@ Mallow's DSL has a moderately rich vocabulary of built-in helpers:
 
 ## Metadata ##
 
-A mallow is stateless, so it can't supply stateful metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
+A mallow is stateless, so it can't supply internal metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
 ```ruby
   Mallow.fluff do |m|
     line = 0
@@ -39,7 +39,7 @@ A mallow is stateless, so it can't supply stateful metadata (like index or match
 ```
 But that is just awful, and will betray you if you forget to increment the line number or define your rules in different lexical environments. Luckily the second reason is that this isn't what Mallow is for, and it should be done as part of some kind of post-processing anyway.
 
-However! Mallow _does_ wrap matched elements in metadata, which can be accessed transparently at any point during the course of a match:
+However! Mallow _does_ wrap matched elements in their own metadata, which can be accessed transparently at any point during the course of a match:
 ```ruby
   doubler = Mallow.fluff do |m|
     m.a(Fixnum).with_metadata(type: Fixnum).to {|n| n*2}
