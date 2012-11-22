@@ -3,17 +3,19 @@ require_relative 'mallow/monadishes'
 require_relative 'mallow/dsl'
 
 module Mallow
-  class DeserializationException < StandardError; end
+  Rule = Monadish::Rule
+  Meta = Monadish::Meta
+  DX   = DeserializationException = Class.new StandardError
 
   class Core < Struct.new :rules
     def self.build(&b); new(DSL.build &b) end
     def _fluff(es); es.map {|e| _fluff1 e}  end
     def _fluff1(e)
-      obj = Rule.bindall!(e, rules).obj
-      obj.is_a?(Meta) ? obj : fail(DeserializationException, "No rule matches `#{e}'")
+      obj = Rule.bind!(e, rules).val
+      obj.is_a?(Meta) ? obj : fail(DX, "No rule matches `#{e}'")
     end
     def fluff(es); es.map  {|e| fluff1 e} end
-    def fluff1(e); _fluff1(e).obj end
+    def fluff1(e); _fluff1(e).val end
   end
 
   class << self

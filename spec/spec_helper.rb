@@ -15,7 +15,7 @@ end
 
 def verify_values(rule, examples)
   examples.each do |e,v|
-    rule[e].obj.should == v
+    rule[e].val.val.should == v
   end
 end
 

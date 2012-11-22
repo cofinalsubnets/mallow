@@ -1,5 +1,19 @@
 module Mallow
   class DSL
+
+    class Rule < Struct.new :conditions, :actions
+      def initialize
+        self.conditions, self.actions = [], []
+      end
+      def call(e)
+        Monadish::Rule.return(
+          conditions.all?{|c| c[e]} ?  Meta.bind!(e,actions) : e )
+      end
+      alias [] call
+    end
+
+    class Action < (Monadish::Proc < :Meta); end
+
     attr_reader :rules, :in_conds
     def self.build
       yield (dsl = new)
@@ -79,7 +93,7 @@ module Mallow
       p = preproc p
       in_conds ?
         rule.conditions << p :
-        rule.actions    << p
+        rule.actions    << Action.new(&p)
       self
     end
 
