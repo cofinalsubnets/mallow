@@ -11,8 +11,8 @@ describe Mallow::Rule do
     end
     context 'when no match is made' do
       before { @rule.conditions << proc {false} }
-      it "returns nil" do
-        @rule[nil].should be_nil
+      it "returns the element" do
+        @rule[999].should == 999
       end
     end
 
@@ -29,7 +29,7 @@ describe Mallow::Rule do
         @called.should == [1, 2, 3]
       end
       it 'fails unless all conditions return truish' do
-        @rule[9].should be_nil
+        @rule[9].should == 9
       end
     end
 
@@ -39,7 +39,7 @@ describe Mallow::Rule do
         [ proc {@called << 1},
           proc {@called << 2},
           proc {@called << 3}
-        ].each {|a| @rule.actions << Mallow::Meta.fn(a)}
+        ].each {|a| @rule.actions << a}
         @rule.conditions << proc {true}
       end
       it 'threads the matched element through the actions in order' do

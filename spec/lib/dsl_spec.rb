@@ -25,7 +25,7 @@ describe Mallow::DSL do
     it "appends a class-matching condition" do
       rule = @dsl.a(Array).rules.last
       rule[[1,2,3]].should be_an_instance_of Mallow::Meta
-      rule[123].should be_nil
+      rule[123].should == 123
     end
   end
 
@@ -42,7 +42,7 @@ describe Mallow::DSL do
     it "appends a size-matching condition and an array-matching condition" do
       rule = @dsl.tuple(2).rules.last
       [ [1], {a: :b, c: :d}, 12345 ].each do |e|
-        rule[e].should be_nil
+        rule[e].should == e
       end
       rule[[1,2]].should be_an_instance_of Mallow::Meta
     end
@@ -55,7 +55,7 @@ describe Mallow::DSL do
         rule[e].should be_an_instance_of Mallow::Meta
       end
       [[1,2], 12345].each do |e|
-        rule[e].should be_nil
+        rule[e].should == e
       end
     end
   end

@@ -15,34 +15,45 @@ module Mallow
     def self.build(&b); new(DSL.build &b) end
     def _fluff(es); es.map {|e| _fluff1 e}  end
     def _fluff1(e)
-      rules.each {|r| res=r[e]; return res if res}
-      fail DeserializationException, "No rule matches `#{e}'"
+      obj = Rule.bindall!(e, rules).obj
+      obj.is_a?(Meta) ? obj : fail(DeserializationException, "No rule matches `#{e}'")
     end
     def fluff(es); es.map  {|e| fluff1 e} end
     def fluff1(e); _fluff1(e).obj end
   end # Core
 
-  class Rule < Struct.new :conditions, :actions
+  module Monadish
+    def self.included(c)
+      c.extend Module.new {def bindall!(e,a); a.reduce(self>>e, :lbind) end}
+    end
+    def lbind(p); self >= lift(p) end
+  end
+
+  class Rule < Struct.new :conditions, :actions, :obj
+    include Monadish
     def initialize
       self.conditions, self.actions = [], []
     end
+    def >>(e);   self.obj = e; self end
+    def >=(p);   obj.is_a?(Meta)? self : p[obj] end
+    def lift(r); proc {|e| r>>r[e]} end
     def [](e)
-      actions.inject(Meta>>e, :>=) if conditions.all?{|c| c[e]}
+      conditions.all?{|c| c[e]} ?  Meta.bindall!(e,actions) : e
     end
+    def self.>>(e) (r=new).obj=e; r end
   end # Rule
 
   class Meta < Hash
     attr_reader :obj
+    include Monadish
     def initialize(o,h={})
       @obj = o
       merge! h
     end
     def >>(o); @obj=o.obj; merge o end
     def >=(p); self >> p[obj]      end
-    class << self
-      def fn(p); proc {|e| Meta>>p[e]} end
-      alias >> new
-    end
+    def lift(p); proc {|e| Meta>>p[e]} end
+    class << self; alias >> new end
   end # Meta
 
   class DSL
@@ -106,9 +117,10 @@ module Mallow
     def push(p)
       in_conds ?
         rule.conditions << p :
-        rule.actions << Meta.fn(p)
+        rule.actions    << p
       self
     end
   end # DSL
+
 end
 
