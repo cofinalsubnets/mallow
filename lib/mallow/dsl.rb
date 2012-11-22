@@ -41,6 +41,10 @@ module Mallow
       and_send(:new,o,s)
     end
 
+    # Checks for three forms:
+    # * (a|an)_(<thing>) with no args
+    # * (with|of)_(<msg>) with one arg, which tests <match>.send(<msg>) == arg
+    # * to_(<msg>) with any args, which resolves to <match>.send(<msg>) *args
     def method_missing(msg, *args)
       case msg.to_s
       when /^(a|an)_(.+)$/
