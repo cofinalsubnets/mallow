@@ -12,7 +12,7 @@ module Mallow
     def _fluff(es); es.map {|e| _fluff1 e}  end
     def _fluff1(e)
       obj = Rule.bind!(e, rules).val
-      obj.is_a?(Meta) ? obj : fail(DX, "No rule matches `#{e}'")
+      obj.is_a?(Meta) ? obj : fail(DX, "No rule matches `#{e}:#{e.class}'")
     end
     def fluff(es); es.map  {|e| fluff1 e} end
     def fluff1(e); _fluff1(e).val end

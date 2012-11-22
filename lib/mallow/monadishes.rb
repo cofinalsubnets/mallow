@@ -3,6 +3,7 @@ module Mallow
 
     def self.included(c)
       c.extend Module.new {def bind!(e,a); a.reduce(self.return(e), :bind) end}
+      c.instance_eval     {alias return new }
     end
     def return(o); self.class.return o end
 
@@ -29,7 +30,6 @@ module Mallow
           self :
           self >> p[val]
       end
-      def self.return(e) (r=new).val=e; r end
     end
 
 
@@ -40,12 +40,10 @@ module Mallow
         @val = o
         merge! h
       end
-      def >>(o); @val=o.val; merge o end
-      def bind(p); self >> p[val]      end
-      class << self; alias return new end
+      def >>(o); @val=o.val; merge o  end
+      def bind(p); self >> p[val]     end
     end
 
   end
-
 end
 
