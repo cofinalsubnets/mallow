@@ -72,6 +72,7 @@ module Mallow
 
     def *;           where {true}                             end
     def a(c);        where {|e| e.is_a? c}                    end
+    def this(o);     where {|e| e == o}                       end
     def size(n);     where {|e| e.size==n     rescue false}   end
     def with_key(k); where {|e| e.has_key?(k) rescue false}   end
 
