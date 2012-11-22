@@ -1,20 +1,18 @@
 require 'spec_helper'
 
 describe Mallow::Rule do
-  before { @rule   = Mallow::Rule.new }
-  describe '#call' do
-    it 'returns an array' do
-      @rule[nil].should be_an_instance_of Array
+  before { @rule = Mallow::Rule.new }
+  describe '#[]' do
+    context 'when a match is made' do
+      before { @rule.conditions << proc {true} }
+      it "returns a Mallow::Meta" do
+        @rule[nil].should be_an_instance_of Mallow::Meta
+      end
     end
-
-    [['succeeding', true], ['failing', false]].each do |cond, success|
-      context "with #{cond} conditions" do
-        before { @rule.conditions << proc { success } }
-        it "returns a #{cond} result" do
-          [true, false, nil, [1], 2345, {6 => 7}].each do |elt|
-            @rule[elt].first.should == success
-          end
-        end
+    context 'when no match is made' do
+      before { @rule.conditions << proc {false} }
+      it "returns nil" do
+        @rule[nil].should be_nil
       end
     end
 
@@ -30,28 +28,23 @@ describe Mallow::Rule do
         @rule[8]
         @called.should == [1, 2, 3]
       end
-      it 'succeeds if and only if all conditions return truish' do
-        verify_success @rule,
-          8   => true,
-          1.2 => false,
-          4   => false,
-          9   => false
+      it 'fails unless all conditions return truish' do
+        @rule[9].should be_nil
       end
     end
 
     context 'with multiple actions' do
       before do
-        [ proc {|a| a << 1},
-          proc {|a| a << 2},
-          proc {|a| a << 3}
-        ].each {|a| @rule.actions << a}
+        @called = []
+        [ proc {@called << 1},
+          proc {@called << 2},
+          proc {@called << 3}
+        ].each {|a| @rule.actions << Mallow::Meta.fn(a)}
+        @rule.conditions << proc {true}
       end
-      context 'and succeeding conditions' do
-        before { @rule.conditions << proc { true } }
-        it 'threads the matched element through the actions in order' do
-          verify_values @rule,
-            [] => [1, 2, 3]
-        end
+      it 'threads the matched element through the actions in order' do
+        @rule[nil]
+        @called.should == [1, 2, 3]
       end
     end
 

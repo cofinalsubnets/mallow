@@ -9,13 +9,13 @@ end
 
 def verify_success(rule, examples)
   examples.each do |e,s|
-    rule[e].first.should == s
+    rule[e].should (s ? be_true : be_false)
   end
 end
 
 def verify_values(rule, examples)
   examples.each do |e,v|
-    rule[e].last.should == v
+    rule[e].obj.should == v
   end
 end
 

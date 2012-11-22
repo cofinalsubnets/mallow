@@ -2,13 +2,12 @@ require 'spec_helper'
 
 describe Mallow::Core do
 
-  before { @fluffer = Mallow::Core.new [] }
 
   describe '#fluff' do
+    before { @mallow = Mallow.fluff {|m| m.a(String).to(&:upcase) } }
     it 'maps #fluff1 over its arguments' do
       data = %w{ me i like a good american made hot dog time to time }
-      data.each {|word| @fluffer.should_receive(:fluff1).with word }
-      @fluffer.fluff(data).should == data.map {nil}
+      @mallow.fluff(data).should == data.map(&:upcase)
     end
   end
 
