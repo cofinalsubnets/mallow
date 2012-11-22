@@ -1,5 +1,5 @@
 module Mallow
-  # = Monad-like classes.
+  # Monad-like classes.
   module Monadish
 
     def self.included(c)
