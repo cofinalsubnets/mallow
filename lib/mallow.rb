@@ -26,7 +26,7 @@ module Mallow
   end # Rule
 
   class Meta < Hash
-    attr_reader :object
+    attr_accessor :object
     def initialize(o,h={})
       @object = o
       merge! h
@@ -60,7 +60,7 @@ module Mallow
     end
 
     def with_metadata(d={})
-      to {|e| Meta.new e, d}
+      to {|e| e.is_a?(Meta) ? e.merge(d) : Meta.new(e, d)}
     end
 
     def a(c);     where {|e| e.is_a? c} end
@@ -84,13 +84,20 @@ module Mallow
 
     private
     def _append(p)
-      @rules.last.send(@context) << p
+      @rules.last.send(@context) << _md_bind(p)
       self
     end
 
     def _set_c(nc)
       @rules << Rule.new if @context == :actions && nc == :conditions
       @context = nc
+    end
+
+    def _md_bind(p)
+      proc do |e|
+        o, md = e.is_a?(Meta) ? [-e,e] : [e]
+        md ? (md.object=p[o];md) : p[o]
+      end
     end
   end # DSL
 end
