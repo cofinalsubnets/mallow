@@ -16,13 +16,14 @@ Now feed your mallow some iterable data:
   data = [{:hay => :good_buddy}]
   mallow.fluff data #=> ['hay good_buddy']
 ```
-Mallow's DSL has a moderately rich vocabulary of built-in helpers:
+Mallow's DSL has a moderately rich vocabulary of built-in helpers (with complementary method_missing magic if that's yr thing):
 ```ruby
   Mallow.fluff { |match|
-    match.a( Float ).to &:to_i
-    match.a_tuple( 3 ).where {|a| a.last != 0 }.to { |a,b,c| a + b / c }
-    match.a_tuple( 2 ).and_hashify_with( :name, :age ).and_make_a( Person ).and &:save!
-    match.a( Hash ).of_size( 22 ).with_key( :crab_nebula ).to { EPIC_SPACE_JOURNEY }
+    match.a(Float).to &:to_i
+    match.tuple(3).where{last != 0}.to {|a,b,c| (a + b) / c}
+    match.an(Array).and_hashify_with( :name, :age ).and_make_a( Person ).and &:save!
+    match.a_fixnum.of_size(8).to {'8bit'}
+    match.a_string.to_upcase
     match.*.to { WILDCARD }
   }.fluff( data )
 ```
@@ -50,4 +51,17 @@ Luckily the second reason is that this isn't what Mallow is for, and it should b
   metadata = doubler._fluff [1,2,:moo] #=> [#<Mallow::Meta>, ...]
   metadata.map(&:obj) == data          #=> true!
 ```
+
+### Of blocks & bindings ###
+
+When a matcher is passed a parameter-less block, Mallow evaluates that block in the context of the element running against the matcher, so for example, in:
+```ruby
+Mallow.fluff {|m| m.to{odd?}}.fluff1(1) #=> true
+
+```
+the receiver of :odd? is 1. In most cases this isn't a problem and helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing. Hooray! If you're sticking side-effecting code in these blocks, though, weird things could potentially happen if you're not careful.
+
+You can prevent this behaviour altogether by:
+* always giving parameters to your blocks; or
+* commenting out the relevant line in dsl.rb.
 

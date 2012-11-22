@@ -27,6 +27,23 @@ module Mallow
       and_send(:new,o,s)
     end
 
+    def method_missing(msg, *args)
+      case msg.to_s
+      when /^(a|an)_(.+)$/
+        args.empty??
+          (a(Object.const_get $2.split(?_).map(&:capitalize).join) rescue super) :
+          super
+      when /^(with|of)_(.+)$/
+        args.size == 1 ?
+          where {|e| e.send($2) == args.first rescue false} :
+          super
+      when /^(to)_(.+)$/
+        to {|e| e.send $2, *args}
+      else
+        super
+      end
+    end
+
     def where(&b); in_conds || ~self; push b end
     def to(&b);    in_conds && ~self; push b end
     def and(&b);                      push b end
@@ -59,10 +76,15 @@ module Mallow
     end
 
     def push(p)
+      p = preproc p
       in_conds ?
         rule.conditions << p :
         rule.actions    << p
       self
+    end
+
+    def preproc(p)
+      p.parameters.empty? ? proc {|e| e.instance_eval &p} : p
     end
   end
 end
