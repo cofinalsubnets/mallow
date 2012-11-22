@@ -4,6 +4,11 @@ module Mallow
 
   class << self
     def fluff(&b); Core.build(&b) end
+    def engulf(klass, sym=:fluff, &b)
+      mtd, mod = Mallow.fluff(&b), Module.new
+      mod.send(:define_method, sym) {|d| mtd.fluff d}
+      klass.extend mod
+    end
   end
 
   class Core < Struct.new :rules
