@@ -3,7 +3,7 @@ module Mallow
   class DeserializationException < StandardError; end
 
   class << self
-    def fluff(&b); Core.new(&b) end
+    def fluff(&b); Core.build(&b) end
   end
 
   class Core < Struct.new :rules
