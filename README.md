@@ -40,16 +40,16 @@ A mallow is stateless, so it can't supply internal metadata (like index or match
 ```
 But that is just awful, and will betray you if you forget to increment the line number or define your rules in different lexical environments.
 
-Luckily the second reason is that this isn't what Mallow is for, and it should be done as part of some kind of post-processing anyway. However! Mallow _does_ wrap a matched element in its own metadata, which can be accessed transparently at any point during the course of a match:
+Luckily the second reason is that this should be done as part of some kind of post-processing anyway. To aid in such endeavours, Mallow wraps a matched element in its _own_ metadata, which can be accessed transparently at any point during the course of a match:
 ```ruby
   doubler = Mallow.fluff do |m|
     m.a(Fixnum).with_metadata(type: Fixnum).to {|n| n*2}
-    m.anything.to {nil}.^(matched: false) # aliased to with_metadata
+    m.anything.to {nil}.^(matched: false) # alias
   end
 
   data = doubler.fluff  [1,2,:moo]     #=> [2, 4, nil]
   metadata = doubler._fluff [1,2,:moo] #=> [#<Mallow::Meta>, ...]
-  metadata.map(&:obj) == data          #=> true!
+  metadata.map(&:val)                  #=> [2, 4, nil]
 ```
 
 ### Of blocks & bindings ###
@@ -59,7 +59,7 @@ When a matcher is passed a parameter-less block, Mallow evaluates that block in 
 Mallow.fluff {|m| m.to{odd?}}.fluff1(1) #=> true
 
 ```
-the receiver of :odd? is 1. In most cases this isn't a problem and helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing. Hooray! If you're sticking side-effecting code in these blocks, though, weird things could potentially happen if you're not careful.
+the receiver of :odd? is 1. In most cases this isn't a problem and helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing (hooray!). If you're sticking side-effecting code in these blocks, though, weird things could potentially happen unless you're careful.
 
 You can prevent this behaviour altogether by:
 * always giving parameters to your blocks; or
