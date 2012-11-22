@@ -2,9 +2,9 @@
 
 Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take advantage of neat-o Ruby language features while reinventing as few wheels as possible.
 
-## Papa teach me to Mallow ##
+## Papa teach me to mallow ##
 
-Is very easy little boy: first marshal, then Mallow!
+To mallow is very simple little boy: first marshal, then mallow!
 
 ```ruby
   mallow = Mallow::Core.build do |match|
@@ -29,7 +29,7 @@ Mallow's DSL has a moderately rich vocabulary of built-in helpers:
 
 ## Metadata ##
 
-A Mallow::Core is stateless, so it can't supply stateful metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
+A mallow is stateless, so it can't supply stateful metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
 ```ruby
   Mallow.fluff do |m|
     line = 0

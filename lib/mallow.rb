@@ -3,7 +3,17 @@ module Mallow
   class DeserializationException < StandardError; end
 
   class << self
-    def fluff(&b); Core.new(&b) end
+    def fluff(&b); Core.build(&b) end
+
+    def engulf(klass, &b)
+      klass.extend Module.new {
+        attr_accessor :mallow
+        def fluff(data)
+          mallow.fluff data
+        end
+      }
+      klass.mallow = Mallow::Core.build &b
+    end
   end
 
   class Core < Struct.new :rules
