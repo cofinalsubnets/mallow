@@ -1,22 +1,20 @@
 module Mallow
   # Rule monad(ish) encapsulating "execute the first rule whose conditions
   # pass" logic.
-  class Rule < Struct.new :cs, :as, :val
+  class Rule < Struct.new :matcher, :transformer, :val
     class << self
-      def return(v); new [], [], v end
+      def return(v); new Matcher.new, Transformer.new, v end
     end
     # Curried proc for building procs for binding rules. If this were Haskell
     # its type signature might vaguely resemble:
     # Elt e => [e -> Bool] -> [e -> e] -> e -> Maybe (Meta e)
-    Builder = ->(cs, as, e) { Rule.new cs, as.map {|p| Meta.proc p}, e }.curry
+    Builder = ->(cs, as, e) {Rule.new cs, as, e }.curry
     # Behaves like an inverted Maybe: return self if match succeeds, otherwise
     # attempt another match.
-    def bind(rule_proc); pass?? self : rule_proc[val] end
+    def bind(rule_proc); matcher === val ? self : rule_proc[val] end
     def return(val); Rule.new cs, as, val end
-    def unwrap!; pass?? go : dx end
+    def unwrap!; matcher === val ? transformer >> val : dx end
     private
-    def pass?; cs.any? && cs.all?{|c| c[val]} end
-    def go; as.reduce(Meta.return(val),:bind) end
     def dx
       raise DeserializationException, "No rule matches #{val}:#{val.class}"
     end
@@ -39,5 +37,21 @@ module Mallow
     # into that of the return value.
     def bind(meta_proc); meta_proc[val].merge(self) {|k,o,n| o} end
   end
+
+  # Container for rule conditions
+  class Matcher < Array
+    # Checks argument against all conditions; returns false if no conditions
+    # are present
+    def ===(e); any? and all? {|t| t[e]} end
+  end
+  # Container for rule actions
+  class Transformer < Array
+    # Threads argument through actions
+    def >>(e); reduce(Meta.return(e),:bind) end
+    # Wraps argument using Meta::proc
+    def <<(p); super Meta.proc(p) end
+    alias push <<
+  end
+
 end
 

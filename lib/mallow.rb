@@ -4,14 +4,13 @@ require 'mallow/dsl'
 module Mallow
   class DeserializationException < StandardError; end
 
-  class Core < Struct.new :rules
+  class Core < Array
     class << self
-      def build(&b); new(DSL.build &b) end
-      private :new
+      def build(&b); DSL.build &b end
     end
     def _fluff(es); es.map {|e| _fluff1 e}  end
     def _fluff1(e)
-      rules.reduce(Rule.return(e),:bind).unwrap!
+      reduce(Rule.return(e),:bind).unwrap!
     end
     def fluff(es); es.map  {|e| fluff1 e} end
     def fluff1(e); _fluff1(e).val end

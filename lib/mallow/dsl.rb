@@ -2,17 +2,18 @@ module Mallow
   class DSL
     require 'mallow/dsl/magic'
     include Magic
-    attr_reader :rules, :actions, :conditions
+    attr_reader :core, :actions, :conditions
 
     class << self
       def build
         yield (dsl = new)
-        dsl.finish
+        dsl.finish!
       end
     end
 
     def initialize
-      @rules, @actions, @conditions = [], [], []
+      @core = Core.new
+      reset!
     end
 
     def where(&b); push b, :conditions end
@@ -49,10 +50,10 @@ module Mallow
     alias and_make_an and_make
     alias a_tuple tuple
     alias of_size size
+    alias rules core #TODO: unalias once we have some decent tests
 
-
-    def finish
-      in_conds? ? to_nil.finish : rule!.rules
+    def finish!
+      in_conds? ? to_nil.finish! : rule!.core
     end
 
     private
@@ -62,9 +63,8 @@ module Mallow
     end
 
     def rule!
-      rules << Rule::Builder[conditions, actions]
-      @conditions, @actions = [], []
-      self
+      core << Rule::Builder[conditions, actions]
+      reset!
     end
 
     def push(p, loc = in_conds? ? :conditions : :actions)
@@ -75,6 +75,11 @@ module Mallow
 
     def preproc(p)
       p.parameters.empty? ? proc {|e| e.instance_eval &p} : p
+    end
+
+    def reset!
+      @conditions, @actions = Matcher.new, Transformer.new
+      self
     end
   end
 end

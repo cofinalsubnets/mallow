@@ -56,7 +56,7 @@ describe Mallow::DSL do
 
   describe '#and_send' do
     it "sends the supplied method to the supplied object with the matched array's elements" do
-      @dsl.and_send(:+, 1).actions.last[1].should == 2
+      @dsl.and_send(:+, 1).actions.last[1].val.should == 2
     end
   end
 
@@ -64,7 +64,7 @@ describe Mallow::DSL do
     it "builds a hash with keys passed as arguments and values from the matched array" do
       @dsl.and_hashify_with_keys(:name, :age).actions.last[
         ['Pete', 21]
-      ].should == {name: 'Pete', age: 21}
+      ].val.should == {name: 'Pete', age: 21}
     end
   end
 
@@ -72,13 +72,13 @@ describe Mallow::DSL do
     it "builds a hash with values passed as arguments and keys from the matched array" do
       @dsl.and_hashify_with_values(:name, :age).actions.last[
         ['Pete', 21]
-      ].should == {'Pete' => :name, 21 => :age}
+      ].val.should == {'Pete' => :name, 21 => :age}
     end
   end
 
   describe '#and_make' do
     it "calls ::new on the supplied class with the matched array's elements" do
-      @dsl.and_make(Array, true).actions.last[[1,2]].should == [2]
+      @dsl.and_make(Array, true).actions.last[[1,2]].val.should == [2]
     end
   end
 
