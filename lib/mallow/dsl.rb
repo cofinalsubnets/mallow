@@ -1,27 +1,26 @@
 module Mallow
   class DSL
 
-    class Rule < Struct.new :conditions, :actions
-      def initialize
-        self.conditions, self.actions = [], []
-      end
-      def call(e)
-        Monadish::Rule.return(
-          conditions.all?{|c| c[e]} ?  Meta.bind!(e,actions) : e )
-      end
-      alias [] call
-    end
+    # Curried proc for building and executing rules. If this were Haskell
+    # its type signature might vaguely resemble:
+    # [Elt e -> Bool] -> [Elt e -> Meta (Elt e)] -> Maybe (Meta (Elt e))
+    Ruler = lambda do |cs, as, e|
+      (m = Monadish::Rule.return(cs, as)).val = e; m
+    end.curry
 
-    class Action < (Monadish::Proc < :Meta); end
-
-    attr_reader :rules, :in_conds
+    attr_reader :rule, :rules, :queue, :in_conds
     def self.build
       yield (dsl = new)
+      dsl.flip! unless dsl.in_conds?
       dsl.rules
     end
 
     def initialize
-      @rules, @in_conds = [Rule.new], true
+      @rule, @rules, @queue = Ruler, [], []
+    end
+
+    def in_conds?
+      rule == Ruler
     end
 
     def and_send(msg, obj, splat = false)
@@ -29,7 +28,7 @@ module Mallow
     end
 
     def with_metadata(d={})
-      rule.actions<<->(e){Meta.new e, d}
+      rule.actions<<->(e){Monadish::Meta.new e, d}
       self
     end
 
@@ -62,9 +61,9 @@ module Mallow
       end
     end
 
-    def where(&b); in_conds || ~self; push b end
-    def to(&b);    in_conds && ~self; push b end
-    def and(&b);                      push b end
+    def where(&b); in_conds? || flip!; push b end
+    def to(&b);    in_conds? && flip!; push b end
+    def and(&b);                       push b end
 
     def *;           where {true}                             end
     def a(c);        where {|e| e.is_a? c}                    end
@@ -85,19 +84,21 @@ module Mallow
     alias a_tuple tuple
     alias of_size size
 
-    protected
-    def rule; rules.last end
-
-    def ~
-      rules << Rule.new if @in_conds = !@in_conds
+    def flip!
+      if in_conds?
+        @rule = rule[queue]
+      else
+        rules << rule[queue]
+        @rule = Ruler
+      end
+      @queue = []
       self
     end
 
+    protected
+
     def push(p)
-      p = preproc p
-      in_conds ?
-        rule.conditions << p :
-        rule.actions    << Action.new(&p)
+      queue << preproc(p)
       self
     end
 

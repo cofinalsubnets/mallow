@@ -7,90 +7,78 @@ describe Mallow::DSL do
     @proc = proc { true }
   end
 
-  it 'has one rule by default' do
-    @dsl.rules.size.should == 1
+  it 'starts with no rules' do
+    @dsl.rules.should have(0).things
   end
 
   describe '#to' do
     it "appends an action to the current rule" do
-      rules = @dsl.rules.size
-      actns = @dsl.rules.last.actions.size
       @dsl.to &@proc
-      @dsl.rules.size.should == rules
-      @dsl.rules.last.actions.size.should == (actns + 1)
+      @dsl.in_conds?.should be_false
+      @dsl.queue.should have(1).thing
     end
   end
 
   describe '#a' do
     it "appends a class-matching condition" do
-      rule = @dsl.a(Array).rules.last
-      rule[[1,2,3]].val.should be_an_instance_of Mallow::Meta
-      rule[123].val.should == 123
+      cond = @dsl.a(Array).queue.last
+      cond.call([1,2,3]).should be_true
+      cond.call(123).should be_false
     end
   end
 
-  describe '#anything' do
+  describe '#*' do
     it "appends a wildcard condition" do
-      rule = @dsl.anything.rules.last
+      rule = @dsl.*.queue.last
       [ 123, :abc, true, false, nil, { 1 => 2 }, [1,2], Class.new ].each do |thing|
-        verify_success rule, thing => true
+        rule[thing].should be_true
       end
-    end
-  end
-
-  describe '#tuple' do
-    it "appends a size-matching condition and an array-matching condition" do
-      rule = @dsl.tuple(2).rules.last
-      [ [1], {a: :b, c: :d}, 12345 ].each do |e|
-        rule[e].val.should == e
-      end
-      rule[[1,2]].val.should be_an_instance_of Mallow::Meta
     end
   end
 
   describe '#size' do
     it "appends a size-matching condition" do
-      rule = @dsl.size(1).rules.last
+      cond = @dsl.size(1).queue.last
       [[1], {a: :b}].each do |e|
-        rule[e].val.should be_an_instance_of Mallow::Meta
+        cond[e].should be_true
       end
       [[1,2], 12345].each do |e|
-        rule[e].val.should == e
+        cond[e].should be_false
       end
     end
   end
 
   describe '#where' do
     it 'appends an arbitrary condition' do
-      @dsl.where {12345}.rules.last.conditions.last.call.should == 12345
+      @dsl.where {12345}.queue.last.call.should == 12345
     end
   end
 
   describe '#and_send' do
     it "sends the supplied method to the supplied object with the matched array's elements" do
-      verify_values @dsl.*.and_send(:+, 1).rules.last,
-        1 => 2
+      @dsl.and_send(:+, 1).queue.last[1].should == 2
     end
   end
 
   describe '#and_hashify_with_keys' do
     it "builds a hash with keys passed as arguments and values from the matched array" do
-      verify_values @dsl.and_hashify_with_keys(:name, :age).rules.last,
-        ['Pete', 21] => {name: 'Pete', age: 21}
+      @dsl.and_hashify_with_keys(:name, :age).queue.last[
+        ['Pete', 21]
+      ].should == {name: 'Pete', age: 21}
     end
   end
 
   describe '#and_hashify_with_values' do
     it "builds a hash with values passed as arguments and keys from the matched array" do
-      verify_values @dsl.and_hashify_with_values(:name, :age).rules.last,
-        ['Pete', 21] => {'Pete' => :name, 21 => :age}
+      @dsl.and_hashify_with_values(:name, :age).queue.last[
+        ['Pete', 21]
+      ].should == {'Pete' => :name, 21 => :age}
     end
   end
 
   describe '#and_make' do
     it "calls ::new on the supplied class with the matched array's elements" do
-      verify_values @dsl.*.and_make(Array, true).rules.last,
-        [1,2] => [2]
+      @dsl.and_make(Array, true).queue.last[[1,2]].should == [2]
     end
   end
 
