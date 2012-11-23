@@ -11,16 +11,11 @@ module Mallow
     attr_reader :rule, :rules, :queue, :in_conds
     def self.build
       yield (dsl = new)
-      dsl.flip! unless dsl.in_conds?
-      dsl.rules
+      dsl.instance_eval {flip! unless in_conds?; rules}
     end
 
     def initialize
       @rule, @rules, @queue = Ruler, [], []
-    end
-
-    def in_conds?
-      rule == Ruler
     end
 
     def and_send(msg, obj, splat = false)
@@ -84,6 +79,12 @@ module Mallow
     alias a_tuple tuple
     alias of_size size
 
+    private
+
+    def in_conds?
+      rule == Ruler
+    end
+
     def flip!
       if in_conds?
         @rule = rule[queue]
@@ -94,8 +95,6 @@ module Mallow
       @queue = []
       self
     end
-
-    protected
 
     def push(p)
       queue << preproc(p)

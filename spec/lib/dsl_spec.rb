@@ -14,7 +14,7 @@ describe Mallow::DSL do
   describe '#to' do
     it "appends an action to the current rule" do
       @dsl.to &@proc
-      @dsl.in_conds?.should be_false
+      @dsl.send(:in_conds?).should be_false
       @dsl.queue.should have(1).thing
     end
   end
