@@ -1,52 +1,43 @@
 module Mallow
-  # Monad-like classes.
-  module Monadish
-
-    def self.included(c)
-      c.extend Module.new {
-        def proc(p)
-          lambda {|e| self.return p[e]}
-        end
-      }
-      c.instance_eval { alias return new }
+  # Rule monad(ish) encapsulating "execute the first rule whose conditions
+  # pass" logic.
+  class Rule < Struct.new :cs, :as, :val
+    class << self
+      def return(v); new [], [], v end
     end
-    def return(o); self.class.return o end
-
-    # Rule monad(ish) encapsulating "execute the first rule whose conditions
-    # pass" logic.
-    class Rule < Struct.new :cs, :as, :val
-      include Monadish
-      # Returns self (if the rule passed) or calls its argument with the
-      # value being matched.
-      def bind(rule_proc); pass?? self : rule_proc[val] end
-      def unwrap!
-        pass?? meta : fail(DeserializationException, "No rule matches #{val}:#{val.class}")
-      end
-      private
-      def pass?; cs.all?{|c| c[val]} end
-      def meta
-        as.map {|p| Meta.proc p}.reduce(Meta.return(val),:bind)
-      end
+    # Curried proc for building procs for binding rules. If this were Haskell
+    # its type signature might vaguely resemble:
+    # Elt e => [e -> Bool] -> [e -> e] -> e -> Maybe (Meta e)
+    Builder = ->(cs, as, e) { Rule.new cs, as.map {|p| Meta.proc p}, e }.curry
+    # Behaves like an inverted Maybe: return self if match succeeds, otherwise
+    # attempt another match.
+    def bind(rule_proc); pass?? self : rule_proc[val] end
+    def return(val); Rule.new cs, as, val end
+    def unwrap!; pass?? go : dx end
+    private
+    def pass?; cs.any? && cs.all?{|c| c[val]} end
+    def go; as.reduce(Meta.return(val),:bind) end
+    def dx
+      raise DeserializationException, "No rule matches #{val}:#{val.class}"
     end
-
-    # Wrapper monad(ish) for successful matches that allows the user to
-    # transparently store and access metadata across binds.
-    class Meta < Hash
-      attr_reader :val
-      include Monadish
-      def initialize(obj,md={})
-        @val = obj
-        merge! md
-      end
-      # Returns a Meta wrapping the value wrapped by meta_proc[self.val],
-      # with merged metadata.
-      def bind(meta_proc);
-        meta = meta_proc[val]
-        @val = meta.val
-        merge meta
-      end
+  end
+  # Wrapper monad(ish) for successful matches that allows the user to
+  # transparently store and access metadata across binds.
+  class Meta < Hash
+    attr_reader :val
+    class << self
+      alias return new
+      # Returns a proc that calls the supplied proc on its argument, and wraps
+      # the return value in a Meta if it wasn't one already.
+      def proc(p); ->(e){ (e=p[e]).is_a?(Meta)? e : self.return(e) } end
     end
-
+    def initialize(obj,md={})
+      @val = obj
+      merge! md
+    end
+    # Calls argument with the wrapped object and reverse-merges its metadata
+    # into that of the return value.
+    def bind(meta_proc); meta_proc[val].merge(self) {|k,o,n| o} end
   end
 end
 

@@ -1,39 +1,51 @@
 module Mallow
   class DSL
-
-    # Curried proc for building and executing rules. If this were Haskell
-    # its type signature might vaguely resemble:
-    # Elt e => [e -> Bool] -> [e -> Meta e] -> e -> Maybe (Meta e)
-    Ruler = lambda do |cs, as, e|
-      (m = Monadish::Rule.return(cs, as)).val = e; m
-    end.curry
-
-    attr_reader :rule, :rules, :queue, :in_conds
-    def self.build
-      yield (dsl = new)
-      dsl.instance_eval {flip! unless in_conds?; rules}
+    attr_reader :rules, :actions, :conditions
+    class << self
+      def build
+        yield (dsl = new)
+        dsl.finish
+      end
     end
 
     def initialize
-      @rule, @rules, @queue = Ruler, [], []
+      @rules, @actions, @conditions = [], [], []
     end
+
+    def where(&b); push b, :conditions end
+    def to(&b);    push b, :actions    end
+    def and(&b);   push b              end
+
+    def *;           where {true}                             end
+    def a(c);        where {|e| e.is_a? c}                    end
+    def this(o);     where {|e| e == o}                       end
+    def size(n);     where {|e| e.size==n     rescue false}   end
+    def with_key(k); where {|e| e.has_key?(k) rescue false}   end
+
+    def and_hashify_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
+    def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
+    def with_metadata(d={});          to {|e| Meta.new e, d}  end
+
+    def to_nil;   to{nil}   end
+    def to_true;  to{true}  end
+    def to_false; to{false} end
+
+    def tuple(n);            a(Array).size(n)   end
+    def and_make(o,s=false); and_send(:new,o,s) end
 
     def and_send(msg, obj, splat = false)
       to {|e| splat ? obj.send(msg, *e) : obj.send(msg, e)}
     end
 
-    def with_metadata(d={})
-      rule.actions<<->(e){Monadish::Meta.new e, d}
-      self
-    end
-
-    def tuple(n)
-      a(Array).size(n) 
-    end
-
-    def and_make(o,s=false)
-      and_send(:new,o,s)
-    end
+    alias an a
+    alias md with_metadata
+    alias ^ with_metadata
+    alias anything *
+    alias and_hashify_with and_hashify_with_keys
+    alias and_make_a and_make
+    alias and_make_an and_make
+    alias a_tuple tuple
+    alias of_size size
 
     # Checks for three forms:
     # * (a|an)_(<thing>) with no args
@@ -56,48 +68,25 @@ module Mallow
       end
     end
 
-    def where(&b); in_conds? || flip!; push b end
-    def to(&b);    in_conds? && flip!; push b end
-    def and(&b);                       push b end
-
-    def *;           where {true}                             end
-    def a(c);        where {|e| e.is_a? c}                    end
-    def this(o);     where {|e| e == o}                       end
-    def size(n);     where {|e| e.size==n     rescue false}   end
-    def with_key(k); where {|e| e.has_key?(k) rescue false}   end
-
-    def and_hashify_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
-    def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
-
-    alias an a
-    alias md with_metadata
-    alias ^ with_metadata
-    alias anything *
-    alias and_hashify_with and_hashify_with_keys
-    alias and_make_a and_make
-    alias and_make_an and_make
-    alias a_tuple tuple
-    alias of_size size
+    def finish
+      in_conds? ? to_nil.finish : rule!.rules
+    end
 
     private
 
     def in_conds?
-      rule == Ruler
+      actions.empty?
     end
 
-    def flip!
-      if in_conds?
-        @rule = rule[queue]
-      else
-        rules << rule[queue]
-        @rule = Ruler
-      end
-      @queue = []
+    def rule!
+      rules << Rule::Builder[conditions, actions]
+      @conditions, @actions = [], []
       self
     end
 
-    def push(p)
-      queue << preproc(p)
+    def push(p, loc = in_conds? ? :conditions : :actions)
+      rule! if loc == :conditions and not in_conds?
+      send(loc) << preproc(p)
       self
     end
 

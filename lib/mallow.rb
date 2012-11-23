@@ -1,11 +1,9 @@
 $LOAD_PATH << File.dirname(__FILE__)
+require 'mallow/monadishes'
+require 'mallow/dsl'
 module Mallow
-  autoload :Monadish, 'mallow/monadishes'
-  autoload :DSL,      'mallow/dsl'
-
   class DeserializationException < StandardError; end
 
-  # The deserializer.
   class Core < Struct.new :rules
     class << self
       def build(&b); new(DSL.build &b) end
@@ -13,7 +11,7 @@ module Mallow
     end
     def _fluff(es); es.map {|e| _fluff1 e}  end
     def _fluff1(e)
-      rules.drop(1).reduce(rules.first[e],:bind).unwrap!
+      rules.reduce(Rule.return(e),:bind).unwrap!
     end
     def fluff(es); es.map  {|e| fluff1 e} end
     def fluff1(e); _fluff1(e).val end
