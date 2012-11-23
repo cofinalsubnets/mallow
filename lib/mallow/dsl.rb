@@ -3,7 +3,7 @@ module Mallow
 
     # Curried proc for building and executing rules. If this were Haskell
     # its type signature might vaguely resemble:
-    # [Elt e -> Bool] -> [Elt e -> Meta (Elt e)] -> Maybe (Meta (Elt e))
+    # Elt e => [e -> Bool] -> [e -> Meta e] -> e -> Maybe (Meta e)
     Ruler = lambda do |cs, as, e|
       (m = Monadish::Rule.return(cs, as)).val = e; m
     end.curry
@@ -54,8 +54,8 @@ module Mallow
         args.size == 1 ?
           where {|e| e.send($2) == args.first rescue false} :
           super
-      when /^(to)_(.+)$/
-        to {|e| e.send $2, *args}
+      when /^to_(.+)$/
+        to {|e| e.send $1, *args}
       else
         super
       end
