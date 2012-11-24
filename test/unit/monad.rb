@@ -39,10 +39,10 @@ Mallow::Test.cases {
 Mallow.test(true) {|that|
   that.RuleLeftIdentity.is  true
   that.RuleRightIdentity.is true
-  that.RuleAssociativity.is  true
+  that.RuleAssociativity.is true
 
   that.MetaLeftIdentity.is  true
   that.MetaRightIdentity.is true
-  that.MetaAssociativity.is  true
+  that.MetaAssociativity.is true
 }
 

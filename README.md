@@ -2,7 +2,7 @@
 
 Mallow is a data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take simultaneous advantage of neat-o Ruby language features and functional programming techniques, while also reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ <  1 wheel / 20 LOC.
 
-An example of Mallow's versatility is Mallow::Test, a little testing library powered by Mallow. ~~Many~~ most of Mallow's own unit tests are written using Mallow::Test!
+An example of Mallow's versatility is Mallow::Test, a little testing library powered by Mallow. Mallow's own unit tests are written using Mallow::Test!
 
 ## Papa teach me to mallow ##
 
@@ -34,10 +34,10 @@ Mallow's DSL has a moderately rich vocabulary of built-in helpers (with compleme
 
 A mallow is stateless, so it can't supply internal metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
 ```ruby
-  Mallow.fluff do |m|
+  Mallow.fluff do |match|
     line = 0
-    m.a(Fixnum).to {"Found a fixnum on line #{line+=1}"}
-    m.*.to {|e| line+=1;e}
+    match.a(Fixnum).to {"Found a fixnum on line #{line+=1}"}
+    match.*.to {|e| line+=1;e}
   end
 ```
 But that is just awful, and will betray you if you forget to increment the line number or define your rules in different lexical environments.
@@ -50,7 +50,7 @@ Luckily the second reason is that this should be done as part of some kind of po
   end
 
   data = doubler.fluff  [1,2,:moo]     #=> [2, 4, nil]
-  metadata = doubler._fluff [1,2,:moo] #=> [#<Mallow::Meta>, ...]
+  metadata = doubler._fluff [1,2,:moo] #=> [{:type=>Fixnum}, {:type=>Fixnum}, {:matched=>false}]
   metadata.map(&:val)                  #=> [2, 4, nil]
 ```
 
@@ -58,7 +58,7 @@ Luckily the second reason is that this should be done as part of some kind of po
 
 When a matcher is passed a parameter-less block, Mallow evaluates that block in the context of the element running against the matcher:
 ```ruby
-  Mallow.fluff {|m| m.to {self} }.fluff1(1) #=> 1
+  Mallow.fluff {|m| m.*.to {self} }.fluff1(1) #=> 1
 ```
 
 In most cases this helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing (hooray!). If you're sticking side-effecting code in these blocks, though, weird things could potentially happen unless you're careful. If you want to avoid this behaviour, just be sure to give parameters to your blocks.
