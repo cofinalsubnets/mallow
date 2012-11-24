@@ -7,7 +7,7 @@ module Mallow::Test::PrettyPrinter
   Red   = "\x1b[31m"
 
   class << self
-    def print(results, n = (ENV['backtrace'].to_i rescue 0))
+    def [](results, n = (ENV['backtrace'].to_i rescue 0))
       results.each do |name, result|
         case result
         when true
@@ -15,7 +15,7 @@ module Mallow::Test::PrettyPrinter
         when false
           msgs = [hi('FAIL', Red),   Plain+name.to_s]
         else
-          msgs = [hi('XPTN', Red),   Plain+name.to_s, result.message]
+          msgs = [hi('XPTN', Red),   Plain+name.to_s, result.class.name, result.message]
           if n > 0
             msgs << backtrace(result,n)
           end

@@ -3,8 +3,8 @@ module Mallow
     # A convenience method that build and executes a Mallow::Test::Core.
     # See documentation for Mallow::Test for usage.
     def test(pp = false, &b)
-      res = Test::Core.build(&b).test!
-      pp ? Test.pp(res) : res
+      res = Test::Core.build(&b).test
+      pp ? Test::PrettyPrinter[res] : res
     end
   end
   # = A testing library for Mallow, by Mallow
@@ -29,19 +29,9 @@ module Mallow
   # * some kind of helper for concurrent expectation chains
   module Test
     autoload :PrettyPrinter, 'mallow/test/pretty_printer'
-
     # Namespace for test cases; see documentation for Mallow::Test
     class Cases; end
-
-    class << self
-      def cases(&b)
-        Cases.send :include, Module.new(&b)
-      end
-
-      def pp(res)
-        PrettyPrinter.print res
-      end
-    end
+    def self.cases(&b); Cases.send :include, Module.new(&b) end
 
     class Core < Mallow::Core
       attr_accessor :cases
@@ -61,7 +51,7 @@ module Mallow
         end
       end
 
-      def test!; _fluff @cases end
+      def test; _fluff @cases end
       def self.build(&b); DSL.build &b end
     end
 
@@ -72,27 +62,49 @@ module Mallow
         reset!
       end
 
-      def method_missing(msg, *args)
-        core.cases << (_case = @cases.method msg) rescue super
-        rule!._this _case
+      def method_missing(msg, *args, &b)
+        case msg.to_s
+        when /^(and|that)_(.+)$/
+          respond_to?($2)? send($2, *args, &b) : super
+        else
+          core.cases << (_case = @cases.method msg) rescue super
+          rule!._this _case
+        end
       end
 
-      def where(&b)
-        super {|e| preproc(b)[e.call] }
+      def where(&b);  super {|e| preproc(b)[e.call] } end
+      def _this(o);   _where {|e|e==o}    end
+      def _where(&b); push b, :conditions end
+
+      def raises(x=nil)
+        _where {
+          begin
+            call
+            false
+          rescue x => e
+            true
+          rescue   => e
+            x ? raise(e) : true
+          end
+        }
       end
 
-      def _this(o)
-        push ->(e){e==o}, :conditions
-      end
-
+      alias is      this
       alias returns this
-      alias returns_a a
-      alias returns_an a
+      alias that_is this
+
       alias is_such_that where
-      alias such_that where
-      alias is this
-      alias is_a a
-      alias is_an a
+      alias such_that    where
+      alias and          where
+
+      alias raises_an           raises
+      alias raises_a            raises
+      alias raises_an_exception raises
+
+      alias is_a       a
+      alias is_an      a
+      alias returns_a  a
+      alias returns_an a
 
     end
   end

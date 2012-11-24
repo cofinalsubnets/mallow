@@ -10,8 +10,7 @@ mallow = Gem::Specification.new do |spec|
   spec.files       = FileList['mallow.gemspec','README.md','Rakefile','lib/**/*.rb']
   spec.test_files  = FileList['test/**/*.rb']
   spec.homepage    = 'http://github.com/gwentacle/mallow'
-  spec.summary     = 'Tiny universal data deserializer / self-implementing test library'
-  spec.description = 'Tiny universal data deserializer / self-implementing test library'
-  spec.add_development_dependency 'testrocket'
+  spec.summary     = 'Tiny universal data deserializer / self-implementing test engine'
+  spec.description = 'Tiny universal data deserializer / self-implementing test engine'
 end
 

@@ -1,13 +1,13 @@
 require 'rake'
 require_relative 'lib/mallow'
 
-task default: 'test:case'
+task default: :test
 
 task test: %w{ test:unit test:case }
 namespace :test do
   %w{ unit case }.each do |test|
     task test do
-      Dir["test/#{test}/*.rb"].each {|file| load file}
+      Dir["test/#{test}/**/*.rb"].each {|file| puts file.sub(/\.rb$/,''); load file}
     end
   end
 end
