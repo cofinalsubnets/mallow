@@ -1,6 +1,8 @@
 # Mallow #
 
-Mallow is a little data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take simultaneous advantage of neat-o Ruby language features and functional programming techniques, while also reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ <  1 wheel / 20 LOC.
+Mallow is a data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take simultaneous advantage of neat-o Ruby language features and functional programming techniques, while also reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ <  1 wheel / 20 LOC.
+
+An example of Mallow's versatility is Mallow::Test, a little testing library powered by Mallow. ~~Many~~ most of Mallow's own unit tests are written using Mallow::Test!
 
 ## Papa teach me to mallow ##
 
@@ -54,14 +56,10 @@ Luckily the second reason is that this should be done as part of some kind of po
 
 ### Of blocks & bindings ###
 
-When a matcher is passed a parameter-less block, Mallow evaluates that block in the context of the element running against the matcher, so for example, in:
+When a matcher is passed a parameter-less block, Mallow evaluates that block in the context of the element running against the matcher:
 ```ruby
-Mallow.fluff {|m| m.to{odd?}}.fluff1(1) #=> true
-
+  Mallow.fluff {|m| m.to {self} }.fluff1(1) #=> 1
 ```
-the receiver of :odd? is 1. In most cases this isn't a problem and helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing (hooray!). If you're sticking side-effecting code in these blocks, though, weird things could potentially happen unless you're careful.
 
-You can prevent this behaviour altogether by:
-* always giving parameters to your blocks; or
-* commenting out the relevant line in dsl.rb.
+In most cases this helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing (hooray!). If you're sticking side-effecting code in these blocks, though, weird things could potentially happen unless you're careful. If you want to avoid this behaviour, just be sure to give parameters to your blocks.
 
