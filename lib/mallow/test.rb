@@ -1,37 +1,41 @@
+# = A testing library for Mallow, by Mallow
+# ---
+# Test cases are instance methods on a class defined in the Mallow::Test
+# namespace, (defaults to Mallow::Test::Cases) and properties of their return
+# values are enumerated using a slightly modified subclass of Mallow::DSL.
+# 
+#  class Mallow::Test::Cases
+#    def test1; 4 + 5 end
+#    def test2; 'test'.upcase end
+#    def test3; 1/0 end
+#  end
+#
+#  Mallow::Test.ns { |that|
+#    that.test1.returns_a(Fixnum).such_that {self < 100}
+#    that.test2.returns 'TeST'
+#    that.test3.returns_a Numeric
+#  } #=> [[:test1, true], [:test2, false], [:test3, #<ZeroDivisionError>], [:test1, true]]
+# TODO:
+# * some kind of helper for concurrent expectation chains
 module Mallow
-  class << self
-    # A convenience method that build and executes a Mallow::Test::Core.
-    # See documentation for Mallow::Test for usage.
-    def test(pp = false, &b)
-      res = Test::Core.build(&b).test
-      pp ? Test::PrettyPrinter[res] : res
-    end
-  end
-  # = A testing library for Mallow, by Mallow
-  # ---
-  # Test cases are instance methods on Mallow::Test::Cases, and the expected
-  # properties of their return values are enumerated using a slightly
-  # modified Mallow::DSL.
-  # 
-  #  Mallow::Test.cases {
-  #    def test1; 4 + 5 end
-  #    def test2; 'test'.upcase end
-  #    def test3; 1/0 end
-  #  }
-  #
-  #  Mallow.test { |that|
-  #    that.test1.returns_a(Fixnum).such_that {self < 100}
-  #    that.test2.returns 'TeST'
-  #    that.test3.returns_a Numeric
-  #  } #=> [[:test1, true], [:test2, false], [:test3, #<ZeroDivisionError>], [:test1, true]]
-  # TODO:
-  # * namespaced tests
-  # * some kind of helper for concurrent expectation chains
   module Test
     autoload :PrettyPrinter, 'mallow/test/pretty_printer'
     # Namespace for test cases; see documentation for Mallow::Test
     class Cases; end
-    def self.cases(&b); Cases.send :include, Module.new(&b) end
+    class << self
+      # A convenience method that builds and executes a Mallow::Test::Core
+      # in the given namespace (defaults to Cases). See documentation for
+      # Mallow::Test for more on usage.
+      def ns(ns=self::Cases, &b)
+        ns=const_get(ns) if ns.is_a? Symbol
+        Mallow::Test::Core.build(ns, &b).test
+      end
+      # A convenience methods that calls ::ns and passes the output to a
+      # pretty printer.
+      def pp(ns=self::Cases, &b)
+        PrettyPrinter[ self.ns ns,&b ]
+      end
+    end
 
     class Core < Mallow::Core
       attr_accessor :cases
@@ -52,13 +56,18 @@ module Mallow
       end
 
       def test; _fluff @cases end
-      def self.build(&b); DSL.build &b end
+      def self.build(ns, &b); DSL.build ns, &b end
     end
 
     class DSL < Mallow::DSL
 
-      def initialize
-        @core, @cases = Core.new, Cases.new
+      def self.build(ns)
+        yield(dsl = new(ns))
+        dsl.finish!
+      end
+
+      def initialize(ns)
+        @core, @cases = Core.new, ns.new
         reset!
       end
 

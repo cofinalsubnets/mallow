@@ -1,4 +1,4 @@
-Mallow::Test.cases {
+class Mallow::Test::Cases
   def RuleLeftIdentity
     rule = Mallow::Rule.return 350_000_000
     f = Mallow::Rule::Builder[Mallow::Matcher.new][Mallow::Transformer.new]
@@ -34,9 +34,9 @@ Mallow::Test.cases {
     g = ->(v){Mallow::Meta.return v, 'Punk' => :Rock}
     meta.bind(f).bind(g) == meta.bind(->(v){f[v].bind(g)})
   end
-}
+end
 
-Mallow.test(true) {|that|
+Mallow::Test.pp {|that|
   that.RuleLeftIdentity.is  true
   that.RuleRightIdentity.is true
   that.RuleAssociativity.is true
