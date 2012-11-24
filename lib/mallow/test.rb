@@ -51,13 +51,13 @@ module Mallow
       end
 
       def _fluff1(e)
-        begin
-          super e.shift
-          e<<true
+        [e.name] << begin
+          super e
+          true
         rescue DeserializationException
-          e<<false
+          false
         rescue => err
-          e<<err
+          err
         end
       end
 
@@ -73,7 +73,7 @@ module Mallow
       end
 
       def method_missing(msg, *args)
-        core.cases << [(_case = @cases.method(msg)), msg] rescue super
+        core.cases << (_case = @cases.method msg) rescue super
         rule!._this _case
       end
 

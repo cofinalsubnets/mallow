@@ -12,7 +12,7 @@ module Mallow
     # Behaves like an inverted Maybe: return self if match succeeds, otherwise
     # attempt another match.
     def bind(rule_proc); matcher === val ? self : rule_proc[val] end
-    def return(val); Rule.new cs, as, val end
+    def return(val); Rule.new matcher, transformer, val end
     def unwrap!; matcher === val ? transformer >> val : dx end
     private
     def dx
