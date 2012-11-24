@@ -1,7 +1,5 @@
 module Mallow
   class DSL
-    require 'mallow/dsl/magic'
-    include Magic
     attr_reader :core, :actions, :conditions
 
     class << self
@@ -49,11 +47,33 @@ module Mallow
     alias and_make_a and_make
     alias and_make_an and_make
     alias a_tuple tuple
+    alias such_that where
     alias of_size size
-    alias rules core #TODO: unalias once we have some decent tests
+    alias rules core
 
     def finish!
       in_conds? ? to_nil.finish! : rule!.core
+    end
+
+    # Checks for three forms:
+    # * (a|an)_(<thing>) with no args
+    # * (with|of)_(<msg>) with one arg, which tests <match>.send(<msg>) == arg
+    # * to_(<msg>) with any args, which resolves to <match>.send(<msg>) *args
+    def method_missing(msg, *args)
+      case msg.to_s
+      when /^(a|an)_(.+)$/
+        args.empty??
+          (a(Object.const_get $2.split(?_).map(&:capitalize).join) rescue super) :
+          super
+      when /^(with|of)_(.+)$/
+        args.size == 1 ?
+          where {|e| e.send($2) == args.first rescue false} :
+          super
+      when /^to_(.+)$/
+        to {|e| e.send $1, *args}
+      else
+        super
+      end
     end
 
     private

@@ -11,8 +11,8 @@ Mallow::Test.cases {
   def DocTest3; 1/0  end
   def DocTest
     Mallow.test { |that|
-      that.DocTest1.is 45
-      that.DocTest2.returns 'TEST'
+      that.DocTest1.returns_a(Fixnum).such_that {self < 100}
+      that.DocTest2.returns 'TeST'
       that.DocTest3.returns_a Numeric
     }
   end
@@ -36,11 +36,11 @@ Mallow::Test.cases {
 }
 
 Mallow.test(true) {|that|
-  that.DocTest.returns do |v|
-    [ v[0] == [:DocTest1, false],
-      v[1] == [:DocTest2, true],
+  that.DocTest.returns_an(Array).of_size(3).such_that do |v|
+    [ v[0] == [:DocTest1, true],
+      v[1] == [:DocTest2, false],
       v[2][0] == :DocTest3,
-      v[2][1].is_a?(ZeroDivisionError)
+      v[2][1].is_a?(ZeroDivisionError),
     ].all?
   end
 
