@@ -24,7 +24,9 @@ module Mallow
   #    that.test2.returns 'TeST'
   #    that.test3.returns_a Numeric
   #  } #=> [[:test1, true], [:test2, false], [:test3, #<ZeroDivisionError>], [:test1, true]]
-  #
+  # TODO:
+  # * namespaced tests
+  # * some kind of helper for concurrent expectation chains
   module Test
     autoload :PrettyPrinter, 'mallow/test/pretty_printer'
 

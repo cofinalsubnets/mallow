@@ -1,4 +1,5 @@
 $LOAD_PATH << File.dirname(__FILE__)
+require 'mallow/version'
 require 'mallow/monadishes'
 require 'mallow/dsl'
 module Mallow
