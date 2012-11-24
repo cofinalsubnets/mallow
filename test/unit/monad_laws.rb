@@ -1,4 +1,4 @@
-class Mallow::Test::Cases
+class Graham::MonadLaws
   def RuleLeftIdentity
     rule = Mallow::Rule.return 350_000_000
     f = Mallow::Rule::Builder[Mallow::Matcher.new][Mallow::Transformer.new]
@@ -36,7 +36,7 @@ class Mallow::Test::Cases
   end
 end
 
-Mallow::Test.pp {|that|
+Graham.pp(:MonadLaws) {|that|
   that.RuleLeftIdentity.is  true
   that.RuleRightIdentity.is true
   that.RuleAssociativity.is true

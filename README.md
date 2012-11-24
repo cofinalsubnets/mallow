@@ -2,7 +2,7 @@
 
 Mallow is a data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take simultaneous advantage of neat-o Ruby language features and functional programming techniques, while also reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ <  1 wheel / 20 LOC.
 
-An example of Mallow's versatility is Mallow::Test, a little testing library powered by Mallow. Mallow's own unit tests are written using Mallow::Test!
+An example of Mallow's versatility is Graham, a tiny testing library powered by Mallow and used for Mallow's own unit tests.
 
 ## Papa teach me to mallow ##
 

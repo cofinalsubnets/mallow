@@ -4,7 +4,6 @@ require 'mallow/monadishes'
 require 'mallow/dsl'
 module Mallow
   class DeserializationException < StandardError; end
-  autoload :Test, 'mallow/test'
 
   class Core < Array
     def fluff(es);  es.map  {|e| fluff1 e} end

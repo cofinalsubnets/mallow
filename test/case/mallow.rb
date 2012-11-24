@@ -1,4 +1,4 @@
-class Mallow::Test::Cases
+class Graham::Cases
   def mallow_case_1
     mallow = Mallow.fluff do |match|
       match.a_string.to_upcase
@@ -10,7 +10,7 @@ class Mallow::Test::Cases
   end
 end
 
-Mallow::Test.pp {|that|
+Graham.pp {|that|
   that.mallow_case_1.returns_an(Array).that_is [ 198, 'ASDF', 'QWER', 15, 94, 'coolstorybro' ]
 }
 
