@@ -42,7 +42,7 @@ A mallow is stateless, so it can't supply internal metadata (like index or match
 ```
 But that is just awful, and will betray you if you forget to increment the line number or define your rules in different lexical environments.
 
-Luckily the second reason is that this should be done as part of some kind of post-processing anyway. To aid in such endeavours, Mallow wraps a matched element in its _own_ metadata, which can be accessed transparently at any point during the course of a match:
+Luckily the second reason is that this should be done as part of some kind of post-processing anyway. To aid in such an undertaking, Mallow wraps a matched element in its _own_ metadata, which can be accessed transparently at any point in the transformer chain once a match has succeeded:
 ```ruby
   doubler = Mallow.fluff do |m|
     m.a(Fixnum).with_metadata(type: Fixnum).to {|n| n*2}
