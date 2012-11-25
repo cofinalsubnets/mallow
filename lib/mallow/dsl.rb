@@ -2,11 +2,9 @@ module Mallow
   class DSL
     attr_reader :core, :actions, :conditions
 
-    class << self
-      def build
-        yield (dsl = new)
-        dsl.finish!
-      end
+    def self.build
+      yield (dsl = new)
+      dsl.finish!
     end
 
     def initialize
@@ -31,6 +29,7 @@ module Mallow
     def to_nil;   to{nil}   end
     def to_true;  to{true}  end
     def to_false; to{false} end
+    def to_self;  to{self}  end
 
     def tuple(n);            a(Array).size(n)   end
     def and_make(o,s=false); and_send(:new,o,s) end
@@ -40,7 +39,6 @@ module Mallow
     end
 
     alias an a
-    alias md with_metadata
     alias ^ with_metadata
     alias anything *
     alias and_hashify_with and_hashify_with_keys
@@ -49,10 +47,10 @@ module Mallow
     alias a_tuple tuple
     alias such_that where
     alias of_size size
-    alias rules core
+    alias to_itself to_self
 
     def finish!
-      in_conds? ? to_nil.finish! : rule!.core
+      in_conds? ? to_self.finish! : rule!.core
     end
 
     # Checks for three forms:
