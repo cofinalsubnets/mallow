@@ -1,6 +1,6 @@
 $LOAD_PATH << File.dirname(__FILE__)
 require 'mallow/version'
-require 'mallow/monadishes'
+require 'mallow/monads'
 require 'mallow/dsl'
 module Mallow
   class DeserializationException < StandardError; end
