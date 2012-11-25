@@ -1,6 +1,6 @@
 # Mallow #
 
-Mallow is a data deserializer and DSL that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take simultaneous advantage of neat-o Ruby language features and functional programming techniques, while also reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ <  1 wheel / 20 LOC.
+Mallow is an engine and DSL for pattern matching and transforming Ruby objects that mildly eases the task of processing heterogeneous data sets. It is small, stateless, and strives to take simultaneous advantage of neat-o Ruby language features and functional programming techniques, while also reinventing ~~as few wheels as possible~~ ~~relatively few wheels~~ <  1 wheel / 20 LOC.
 
 An example of Mallow's versatility is Graham, a tiny testing library powered by Mallow and used for Mallow's own unit tests.
 
@@ -10,13 +10,13 @@ To mallow is very simple little boy: first marshal, then mallow!
 
 ```ruby
   mallow = Mallow::Core.build do |match|
-    match.a( Hash ).to {|h| "#{h.keys.first} #{h.values.first}"}
+    match.a_hash.to {"#{keys.first} #{values.first}"}
   end
 ```
 Now feed your mallow some iterable data:
 ```ruby
   data = [{:hay => :good_buddy}]
-  mallow.fluff data #=> ['hay good_buddy']
+  mallow.fluff data #=> ["hay good_buddy"]
 ```
 Mallow's DSL has a moderately rich vocabulary of built-in helpers (with complementary method_missing magic if that's yr thing):
 ```ruby
@@ -54,12 +54,11 @@ Luckily the second reason is that this should be done as part of some kind of po
   metadata.map(&:val)                  #=> [2, 4, nil]
 ```
 
-### Of blocks & bindings ###
+### Blocks & bindings ###
 
 When a matcher is passed a parameter-less block, Mallow evaluates that block in the context of the element running against the matcher:
 ```ruby
   Mallow.fluff {|m| m.*.to {self} }.fluff1(1) #=> 1
 ```
-
 In most cases this helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing (hooray!). If you're sticking side-effecting code in these blocks, though, weird things could potentially happen unless you're careful. If you want to avoid this behaviour, just be sure to give parameters to your blocks.
 
