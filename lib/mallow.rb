@@ -6,9 +6,15 @@ module Mallow
   class DeserializationException < StandardError; end
 
   class Core < Array
-    def fluff(es);  es.map  {|e| fluff1 e} end
-    def fluff1(e);  _fluff1(e).val         end
-    def _fluff(es); es.map {|e| _fluff1 e} end
+    def fluff(es)
+      _fluff(es).map &:val
+    end
+    def fluff1(e)
+      _fluff1(e).val
+    end
+    def _fluff(es)
+      es.map {|e| _fluff1 e}
+    end
     def _fluff1(e)
       reduce(Rule.return(e),:bind).unwrap!
     end

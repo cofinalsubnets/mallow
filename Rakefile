@@ -1,3 +1,5 @@
+$LOAD_PATH << File.expand_path('../lib', __FILE__)
+require 'mallow'
 require 'rake'
 require 'graham/rake_task'
 

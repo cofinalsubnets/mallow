@@ -23,12 +23,9 @@ module Mallow
   # transparently store and access metadata across binds.
   class Meta < Hash
     attr_reader :val
-    class << self
-      alias return new
-      # Returns a proc that calls the supplied proc on its argument, and wraps
-      # the return value in a Meta if it wasn't one already.
-      def proc(p); ->(e){ (e=p[e]).is_a?(Meta)? e : self.return(e) } end
-    end
+    # Curried proc that takes a proc and an object, calls the proc with the
+    # object, and wraps the return value in a Meta if it wasn't one already.
+    Builder = ->(p,e) { Meta === (e=p[e]) ? e : Meta.return(e) }.curry
     def initialize(obj,md={})
       @val = obj
       merge! md
@@ -36,6 +33,7 @@ module Mallow
     # Calls argument with the wrapped object and reverse-merges its metadata
     # into that of the return value.
     def bind(meta_proc); meta_proc[val].merge(self) {|k,o,n| o} end
+    class << self; alias return new end
   end
 
   # Container for rule conditions
@@ -49,7 +47,7 @@ module Mallow
     # Threads argument through actions
     def >>(e); reduce(Meta.return(e),:bind) end
     # Wraps argument using Meta::proc
-    def <<(p); super Meta.proc(p) end
+    def <<(p); super Meta::Builder[p] end
     alias push <<
   end
 
