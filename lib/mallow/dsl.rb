@@ -1,3 +1,4 @@
+require 'pry'
 module Mallow
   class DSL
     attr_reader :core, :actions, :conditions
@@ -26,11 +27,6 @@ module Mallow
     def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
     def with_metadata(d={});          to {|e| Meta.new e, d}  end
 
-    def to_nil;   to{nil}   end
-    def to_true;  to{true}  end
-    def to_false; to{false} end
-    def to_self;  to{self}  end
-
     def tuple(n);            a(Array).size(n)   end
     def and_make(o,s=false); and_send(:new,o,s) end
 
@@ -47,16 +43,16 @@ module Mallow
     alias a_tuple tuple
     alias such_that where
     alias of_size size
-    alias to_itself to_self
 
     def finish!
-      in_conds? ? to_self.finish! : rule!.core
+      in_conds? ? to{self}.finish! : rule!.core
     end
 
     # Checks for three forms:
     # * (a|an)_(<thing>) with no args
     # * (with|of)_(<msg>) with one arg, which tests <match>.send(<msg>) == arg
-    # * to_(<msg>) with any args, which resolves to <match>.send(<msg>) *args
+    # * to_(<msg>) with any args, which evals $1 and any args in the context
+    #   of the match. be careful!
     def method_missing(msg, *args)
       case msg.to_s
       when /^(a|an)_(.+)$/
@@ -68,7 +64,7 @@ module Mallow
           where {|e| e.send($2) == args.first rescue false} :
           super
       when /^to_(.+)$/
-        to {|e| e.send $1, *args}
+        to {|e| e.instance_eval "#{$1} #{args.join ','}"}
       else
         super
       end
