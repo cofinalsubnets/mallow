@@ -2,9 +2,7 @@ module Mallow
   # Rule monad(ish) encapsulating "execute the first rule whose conditions
   # pass" logic.
   class Rule < Struct.new :matcher, :transformer, :val
-    class << self
-      def return(v); new Matcher.new, Transformer.new, v end
-    end
+    def self.return(v); new Matcher.new, Transformer.new, v end
     # Curried proc for building procs for binding rules. If this were Haskell
     # its type signature might vaguely resemble:
     # Elt e => [e -> Bool] -> [e -> e] -> e -> Maybe (Meta e)
@@ -50,6 +48,5 @@ module Mallow
     def <<(p); super Meta::Builder[p] end
     alias push <<
   end
-
 end
 

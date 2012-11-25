@@ -17,19 +17,19 @@ module Mallow
     def and(&b);   push b              end
 
     def *;           where {true}                             end
-    def a(c);        where {|e| e.is_a? c}                    end
-    def this(o);     where {|e| e == o}                       end
+    def a(c);        where {|e| c===e}                        end
+    def this(o);     where {|e| o== e}                        end
     def size(n);     where {|e| e.size==n     rescue false}   end
     def with_key(k); where {|e| e.has_key?(k) rescue false}   end
 
     def and_hashify_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
     def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
-    def with_metadata(d={});          to {|e| Meta.new e, d}  end
+    def with_metadata(d={});          to {|e| Meta.new e, d } end
 
-    def to_nil;   to{nil}   end
-    def to_true;  to{true}  end
+    def to_nil;   to{nil  } end
+    def to_true;  to{true } end
     def to_false; to{false} end
-    def to_self;  to{self}  end
+    def to_self;  to{self } end
 
     def tuple(n);            a(Array).size(n)   end
     def and_make(o,s=false); and_send(:new,o,s) end
