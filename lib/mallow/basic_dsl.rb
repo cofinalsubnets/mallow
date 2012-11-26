@@ -20,6 +20,8 @@ module Mallow
       in_conds? ? to{self}.finish! : rule!.core
     end
 
+    alias such_that where
+
     private
     def in_conds?
       actions.empty?
