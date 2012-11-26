@@ -30,7 +30,7 @@ class Graham::Cases
 end
 
 Graham.pp {|that|
-  that.Case1.returns_an(Array).that_is [ 198, 'ASDF', 'QWER', 15, 94, 'coolstorybro' ]
+  that.Case1.returns_an_array.that_is [ 198, 'ASDF', 'QWER', 15, 94, 'coolstorybro' ]
   that.XCase1.raises_a ZeroDivisionError
   that.XCase2.raises_a NoMethodError
   that.XCase3.does_not_raise_an_exception

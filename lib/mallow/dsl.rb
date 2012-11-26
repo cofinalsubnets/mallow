@@ -1,4 +1,3 @@
-require 'pry'
 module Mallow
   class DSL
     attr_reader :core, :actions, :conditions
@@ -49,20 +48,16 @@ module Mallow
     end
 
     # Checks for three forms:
-    # * (a|an)_(<thing>) with no args
-    # * (with|of)_(<msg>) with one arg, which tests <match>.send(<msg>) == arg
+    # * an?_(<thing>) with no args
+    # * (with|of)_(<msg>), which tests <match>.send(<msg>) == args.first
     # * to_(<msg>) with any args, which evals $1 and any args in the context
     #   of the match. be careful!
     def method_missing(msg, *args)
       case msg.to_s
-      when /^(a|an)_(.+)$/
-        args.empty??
-          (a(Object.const_get $2.split(?_).map(&:capitalize).join) rescue super) :
-          super
+      when /^an?_(.+)$/
+        a Object.const_get $1.split(?_).map(&:capitalize).join
       when /^(with|of)_(.+)$/
-        args.size == 1 ?
-          where {|e| e.send($2) == args.first rescue false} :
-          super
+        where {|e| e.send($2) == args.first rescue false}
       when /^to_(.+)$/
         to {|e| e.instance_eval "#{$1} #{args.join ','}"}
       else
@@ -71,10 +66,7 @@ module Mallow
     end
 
     private
-
-    def in_conds?
-      actions.empty?
-    end
+    def in_conds?; actions.empty? end
 
     def rule!
       core << Rule::Builder[conditions, actions]
