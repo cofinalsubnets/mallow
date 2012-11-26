@@ -24,17 +24,21 @@ module Mallow
 
     def and_hashify_with_keys(*ks);   to {|e| Hash[ks.zip e]} end
     def and_hashify_with_values(*vs); to {|e| Hash[e.zip vs]} end
-    def with_metadata(d={});          to {|e| Meta.new e, d } end
+    def ^(d={});                      to {|e| Meta.new e, d } end
 
-    def tuple(n);            a(Array).size(n)   end
-    def and_make(o,s=false); and_send(:new,o,s) end
+    def tuple(n)
+      a(Array).size(n) 
+    end
 
-    def and_send(msg, obj, splat = false)
+    def and_make(o,s=false)
+      and_send(o,:new,s)
+    end
+
+    def and_send(obj, mgs, splat = false)
       to {|e| splat ? obj.send(msg, *e) : obj.send(msg, e)}
     end
 
     alias an a
-    alias ^ with_metadata
     alias anything *
     alias and_hashify_with and_hashify_with_keys
     alias and_make_a and_make
@@ -55,7 +59,7 @@ module Mallow
     def method_missing(msg, *args)
       case msg.to_s
       when /^an?_(.+)$/
-        a Object.const_get $1.split(?_).map(&:capitalize).join
+        a constantize $1
       when /^(with|of)_(.+)$/
         where {|e| e.send($2) == args.first rescue false}
       when /^to_(.+)$/
@@ -66,7 +70,13 @@ module Mallow
     end
 
     private
-    def in_conds?; actions.empty? end
+    def in_conds?
+      actions.empty?
+    end
+
+    def constantize(s)
+      Object.const_get s.split(?_).map(&:capitalize).join
+    end
 
     def rule!
       core << Rule::Builder[conditions, actions]
