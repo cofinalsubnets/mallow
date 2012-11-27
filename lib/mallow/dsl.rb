@@ -37,29 +37,6 @@ module Mallow
     include Matchers
     include Transformers
 
-
-    # Checks for three forms:
-    # * an?_(<thing>) with no args
-    # * (with|of)_(<msg>), which tests <match>.send(<msg>) == args.first
-    # * to_(<msg>) with any args, which evals $1 and any args in the context
-    #   of the match. be careful!
-    def method_missing(msg, *args)
-      case msg.to_s
-      when /^an?_(.+)$/
-        a constantize $1
-      when /^(with|of)_(.+)$/
-        where {|e| e.send($2) == args.first rescue false}
-      when /^to_(.+)$/
-        to {|e| e.instance_eval "#{$1} #{args.join ','}"}
-      else
-        super
-      end
-    end
-
-    private
-    def constantize(s)
-      Object.const_get s.split(?_).map(&:capitalize).join
-    end
   end
 end
 

@@ -2,7 +2,7 @@ module Mallow
   class BasicDSL
     attr_reader :core, :actions, :conditions
 
-    def self.build
+    def self.build_core
       yield (dsl = new)
       dsl.finish!
     end

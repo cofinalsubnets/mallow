@@ -14,7 +14,7 @@ module Mallow
     def unwrap!; matcher === val ? transformer >> val : dx end
     private
     def dx
-      raise DeserializationException, "No rule matches #{val}:#{val.class}"
+      raise MatchException, "No rule matches #{val}:#{val.class}"
     end
   end
   # Wrapper monad(ish) for successful matches that allows the user to
