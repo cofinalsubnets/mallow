@@ -1,4 +1,3 @@
-$LOAD_PATH << File.dirname(__FILE__)
 require 'mallow/version'
 require 'mallow/monads'
 require 'mallow/dsl'

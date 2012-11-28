@@ -43,8 +43,9 @@ module Mallow
   end
   # Container for rule actions
   class Transformer < Array
+    def initialize; @memo={} end
     # Threads argument through actions
-    def >>(e); reduce(Meta.return(e),:bind) end
+    def >>(e); @memo[e] ||= reduce(Meta.return(e),:bind) end
     # Wraps argument using Meta::proc
     def <<(p); super Meta::Builder[p] end
   end
