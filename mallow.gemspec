@@ -2,7 +2,7 @@ $LOAD_PATH << File.expand_path("../lib", __FILE__)
 require 'rake'
 require 'mallow/version'
 
-mallow = Gem::Specification.new do |spec|
+Gem::Specification.new do |spec|
   spec.name        = 'mallow'
   spec.version     = Mallow::VERSION
   spec.author      = 'feivel jellyfish'
@@ -12,6 +12,6 @@ mallow = Gem::Specification.new do |spec|
   spec.homepage    = 'http://github.com/gwentacle/mallow'
   spec.summary     = 'Tiny universal data pattern matcher / dispatcher'
   spec.description = 'Tiny universal data pattern matcher / dispatcher'
-  spec.add_development_dependency 'graham'
+  spec.add_development_dependency 'graham', '>=0.0.2'
 end
 

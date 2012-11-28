@@ -6,10 +6,10 @@ An example of Mallow's versatility is Graham, a tiny testing library powered by 
 
 ## Papa teach me to mallow ##
 
-To mallow is very simple little boy: first marshal, then mallow!
+To mallow it is very easy little boy. First marshal, then mallow:
 
 ```ruby
-  mallow = Mallow::Core.build do |match|
+  mallow = Mallow.build do |match|
     match.a_hash.to {"#{keys.first} #{values.first}"}
   end
 ```
@@ -20,7 +20,7 @@ Now feed your mallow some iterable data:
 ```
 Mallow's DSL has a moderately rich vocabulary of built-in helpers (with complementary method_missing magic if that's yr thing):
 ```ruby
-  Mallow.fluff { |match|
+  Mallow.build { |match|
     match.a(Float).to &:to_i
     match.tuple(3).where{last != 0}.to {|a,b,c| (a + b) / c}
     match.an(Array).and_hashify_with( :name, :age ).and_make_a( Person ).and &:save!
@@ -34,7 +34,7 @@ Mallow's DSL has a moderately rich vocabulary of built-in helpers (with compleme
 
 A mallow is stateless, so it can't supply internal metadata (like index or match statistics) to rules. But that is not necessary for two reasons. First:
 ```ruby
-  Mallow.fluff do |match|
+  Mallow.build do |match|
     line = 0
     match.a(Fixnum).to {"Found a fixnum on line #{line+=1}"}
     match.*.to {|e| line+=1;e}
@@ -44,9 +44,9 @@ But that is just awful, and will betray you if you forget to increment the line 
 
 Luckily the second reason is that this should be done as part of some kind of post-processing anyway. To aid in such an undertaking, Mallow wraps a matched element in its _own_ metadata, which can be accessed transparently at any point in the transformer chain once a match has succeeded:
 ```ruby
-  doubler = Mallow.fluff do |m|
-    m.a(Fixnum).with_metadata(type: Fixnum).to {|n| n*2}
-    m.anything.to {nil}.^(matched: false) # alias
+  doubler = Mallow.build do |m|
+    m.a(Fixnum).^(type: Fixnum).to {|n| n*2}
+    m.anything.to {nil}.^(matched: false)
   end
 
   data = doubler.fluff  [1,2,:moo]     #=> [2, 4, nil]
@@ -58,7 +58,7 @@ Luckily the second reason is that this should be done as part of some kind of po
 
 When a matcher is passed a parameter-less block, Mallow evaluates that block in the context of the element running against the matcher:
 ```ruby
-  Mallow.fluff {|m| m.*.to {self} }.fluff1(1) #=> 1
+  Mallow.build {|m| m.*.to {self} }.fluff1(1) #=> 1
 ```
 In most cases this helps to make code less verbose and more semantic without having to rely on dispatch-via-method_missing (hooray!). If you're sticking side-effecting code in these blocks, though, weird things could potentially happen unless you're careful. If you want to avoid this behaviour, just be sure to give parameters to your blocks.
 

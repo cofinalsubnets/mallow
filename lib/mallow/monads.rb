@@ -46,7 +46,6 @@ module Mallow
     def >>(e); reduce(Meta.return(e),:bind) end
     # Wraps argument using Meta::proc
     def <<(p); super Meta::Builder[p] end
-    alias push <<
   end
 end
 
