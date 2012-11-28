@@ -36,10 +36,9 @@ module Mallow
 
   # Container for rule conditions
   class Matcher < Array
-    def initialize; @memo={} end
     # Checks argument against all conditions; returns false if no conditions
     # are present
-    def ===(e); @memo[e] ||= (any? and all? {|t| t[e]}) end
+    def ===(e); any? and all? {|t| t[e]} end
   end
   # Container for rule actions
   class Transformer < Array
