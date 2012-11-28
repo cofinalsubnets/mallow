@@ -18,7 +18,7 @@ Now feed your mallow some iterable data:
   data = [{:hay => :good_buddy}]
   mallow.fluff data #=> ["hay good_buddy"]
 ```
-Mallow's DSL has a moderately rich vocabulary of built-in helpers (with complementary method_missing magic if that's yr thing):
+Mallow's DSL has a fairly rich vocabulary of built-in helpers:
 ```ruby
   Mallow.build { |match|
     match.a(Float).to &:to_i
