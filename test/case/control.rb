@@ -33,7 +33,7 @@ class Exceptions
 end
 
 Graham.pp(Cases) {|that|
-  that.test_case_1.returns_an_array.that_is [ 198, 'ASDF', 'QWER', 15, 94, 'coolstorybro' ]
+  that.test_case_1.returns_an(Array).that_is [ 198, 'ASDF', 'QWER', 15, 94, 'coolstorybro' ]
 }
 
 Graham.pp(Exceptions) {|that|
