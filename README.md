@@ -10,7 +10,7 @@ To mallow it is very easy little boy. First marshal, then mallow:
 
 ```ruby
   mallow = Mallow.build do |match|
-    match.a_hash.to {"#{keys.first} #{values.first}"}
+    match.a(Hash).to {"#{keys.first} #{values.first}"}
   end
 ```
 Now feed your mallow some iterable data:
@@ -24,8 +24,8 @@ Mallow's DSL has a fairly rich vocabulary of built-in helpers:
     match.a(Float).to &:to_i
     match.tuple(3).where{last != 0}.to {|a,b,c| (a + b) / c}
     match.an(Array).and_hashify_with( :name, :age ).and_make_a( Person ).and &:save!
-    match.a_fixnum.of_size(8).to {'8bit'}
-    match.a_string.to_upcase
+    match.a(Fixnum).of_size(8).to {'8bit'}
+    match.a(String).to{upcase}
     match.*.to { WILDCARD }
   }.fluff( data )
 ```
@@ -46,7 +46,7 @@ Luckily the second reason is that this should be done as part of some kind of po
 ```ruby
   doubler = Mallow.build do |m|
     m.a(Fixnum).^(type: Fixnum).to {|n| n*2}
-    m.anything.to {nil}.^(matched: false)
+    m.*.to {nil}.^(matched: false)
   end
 
   data = doubler.fluff  [1,2,:moo]     #=> [2, 4, nil]
