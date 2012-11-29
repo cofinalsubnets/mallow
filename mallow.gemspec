@@ -12,6 +12,6 @@ Gem::Specification.new do |spec|
   spec.homepage    = 'http://github.com/gwentacle/mallow'
   spec.summary     = 'Tiny universal data pattern matcher / dispatcher'
   spec.description = 'Tiny universal data pattern matcher / dispatcher'
-  spec.add_development_dependency 'graham', '>=0.0.2'
+  spec.add_development_dependency 'graham', '>=0.0.3'
 end
 
