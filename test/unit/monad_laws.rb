@@ -36,7 +36,7 @@ class MonadLaws
   end
 end
 
-Graham.pp(MonadLaws) {|that|
+Graham.pp(MonadLaws.new) {|that|
   that.RuleLeftIdentity.is  true
   that.RuleRightIdentity.is true
   that.RuleAssociativity.is true

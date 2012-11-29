@@ -5,7 +5,7 @@ class MetaTests
   end
 end
 
-Graham.pp(MetaTests) do |that|
+Graham.pp(MetaTests.new) do |that|
   that.binding_behaviour_with_common_keys.returns meta: :data!, any: :body?
 end
 

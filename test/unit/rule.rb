@@ -39,7 +39,7 @@ class RuleTests
   end
 end
 
-Graham.pp(RuleTests) do |that|
+Graham.pp(RuleTests.new) do |that|
   that.unwrapping_an_empty_rule.raises_a Mallow::MatchException
   that.unwrapping_a_failing_rule.raises_a Mallow::MatchException
   that.unwrapping_a_passing_rule.returns_a(Mallow::Meta).such_that { val == :value }

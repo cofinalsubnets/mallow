@@ -32,11 +32,11 @@ class Exceptions
 
 end
 
-Graham.pp(Cases) {|that|
+Graham.pp(Cases.new) {|that|
   that.test_case_1.returns_an(Array).that_is [ 198, 'ASDF', 'QWER', 15, 94, 'coolstorybro' ]
 }
 
-Graham.pp(Exceptions) {|that|
+Graham.pp(Exceptions.new) {|that|
   that.division_by_zero.raises_a ZeroDivisionError
   that.calling_a_nonexistent_method.raises_a NoMethodError
   that.an_unmatched_element.raises_a Mallow::MatchException
